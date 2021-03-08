@@ -2,9 +2,11 @@
   "name": "appium-wait-plugin",
   "version": "1.0.0",
   "description": "An appium 2.0 plugin that waits for element to be found",
-  "main": "index.ts",
+  "main": "./lib/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d lib",
+    "prepublish": "babel src -d lib"
   },
   "repository": {
     "type": "git",
@@ -25,7 +27,16 @@
     "ts-node": "^9.1.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^24.3.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-config-prettier": "^4.2.0",
+    "eslint-plugin-prettier": "^3.0.1"
   },
   "appium": {
     "pluginName": "element-wait",
@@ -35,8 +46,16 @@
     "node": ">=10",
     "npm": ">=6"
   },
-  "directories": {
-    "lib": "./lib"
+  "lint-staged": {
+    "**/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write --single-quote",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "files": [
     "lib"
