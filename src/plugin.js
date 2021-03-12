@@ -15,9 +15,9 @@ export default class WaitCommandPlugin extends BasePlugin {
   async _find(driver, locatorArgs) {
     const strategy = locatorArgs[0];
     const selector = locatorArgs[1];
-    const automationName = this._getAutomationName(driver);
+    const baseUrl = this._constructSessionUrl(driver);
     const response = await fetch(
-      `http://${driver[automationName].host}:${driver[automationName].systemPort}/wd/hub/session/${driver.sessionId}/element`,
+      `${baseUrl}wd/hub/session/${driver.sessionId}/element`,
       {
         body: JSON.stringify({
           strategy,
@@ -42,6 +42,15 @@ export default class WaitCommandPlugin extends BasePlugin {
   }
 
   _getAutomationName(driver) {
-    return driver.caps.automationName.toLowerCase();
+    return driver.caps.automationName;
+  }
+
+  _constructSessionUrl(driver) {
+    const automationName = this._getAutomationName(driver);
+    if (automationName === 'XCuiTest') {
+      return `${driver.wda.wdaBaseUrl}:${driver.wda.wdaLocalPort}/`;
+    } else {
+      return `http://${driver[automationName].host}:${driver[automationName].systemPort}/`;
+    }
   }
 }
