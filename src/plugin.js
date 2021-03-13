@@ -4,8 +4,10 @@ import fetch from 'node-fetch';
 let retryCount = 0;
 export default class WaitCommandPlugin extends BasePlugin {
   async findElement(next, driver, ...args) {
-    const locatorArgs = JSON.parse(JSON.stringify(args));
     let originalRes;
+    const locatorArgs = JSON.parse(JSON.stringify(args));
+    this.strategy = locatorArgs[0];
+    this.selector = locatorArgs[1];
     await this._find(driver, locatorArgs);
     await this._elementDisplayed(driver);
     originalRes = await next();
@@ -13,16 +15,14 @@ export default class WaitCommandPlugin extends BasePlugin {
     return originalRes;
   }
 
-  async _find(driver, locatorArgs) {
-    const strategy = locatorArgs[0];
-    const selector = locatorArgs[1];
+  async _find(driver) {
     const baseUrl = this._constructSessionUrl(driver);
     const response = await fetch(
       `${baseUrl}wd/hub/session/${driver.sessionId}/element`,
       {
         body: JSON.stringify({
-          strategy,
-          selector,
+          strategy: this.strategy,
+          selector: this.selector,
           context: '',
           multiple: false,
         }),
@@ -34,23 +34,24 @@ export default class WaitCommandPlugin extends BasePlugin {
     if (json.value.error) {
       if (retryCount !== 25) {
         this.logger.info(
-          `Retrying to find element with ${strategy} strategy for ${selector} selector`
+          `Retrying to find element with ${this.strategy} strategy for ${this.selector} selector`
         );
         retryCount++;
-        await this._find(driver, locatorArgs);
+        await this._find(driver);
       }
     }
 
     if (json.sessionId && json.value.ELEMENT) {
       this.element = json.value.ELEMENT;
       this.logger.info(
-        `Element with ${strategy} strategy for ${selector} selector found.`
+        `Element with ${this.strategy} strategy for ${this.selector} selector found.`
       );
+      retryCount = 0;
     }
   }
 
   async _elementDisplayed(driver) {
-    this.logger.info('Checking if element is displayed');
+    this.logger.info(`Checking if ${this.selector} element is displayed`);
     const baseUrl = this._constructSessionUrl(driver);
     const response = await fetch(
       `${baseUrl}wd/hub/session/${driver.sessionId}/element/${this.element}/attribute/displayed`,
@@ -63,14 +64,15 @@ export default class WaitCommandPlugin extends BasePlugin {
     if (json.value.error) {
       if (retryCount !== 25) {
         this.logger.info(
-          `Retrying to check whether ${this.element} element is displayed or not`
+          `Retrying to check whether ${this.selector} element is displayed or not`
         );
         retryCount++;
         await this._elementDisplayed(driver);
       }
     }
     if (json.sessionId && json.value === 'true') {
-      this.logger.info(`Element with ${this.element} id is displayed.`);
+      this.logger.info(`${this.selector} element is displayed.`);
+      retryCount = 0;
     }
   }
 

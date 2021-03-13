@@ -49,3 +49,15 @@ driver.findElementByAccessibilityId("login").click();
 driver.findElementByAccessibilityId("slider1").click();
 driver.findElementByAccessibilityId("login").sendKeys('Hello');
 ```
+
+Server logs will be as below:
+
+```
+[Appium] Plugin element-wait (sessionless) is now handling cmd 'findElement'
+[Plugin [element-wait (sessionless)]] Retrying to find element with accessibility id strategy for login selector
+[Plugin [element-wait (sessionless)]] Retrying to find element with accessibility id strategy for login selector
+[Plugin [element-wait (sessionless)]] Retrying to find element with accessibility id strategy for login selector
+[Plugin [element-wait (sessionless)]] Element with accessibility id strategy for login selector found.
+[Plugin [element-wait (sessionless)]] Checking if login element is displayed
+[Plugin [element-wait (sessionless)]] login element is displayed.
+```
