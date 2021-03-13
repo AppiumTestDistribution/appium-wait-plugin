@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "babel src -d lib",
-    "prepublish": "babel src -d lib"
+    "prepublish": "babel src -d lib",
+    "prettier": "prettier --write --single-quote"
   },
   "repository": {
     "type": "git",
@@ -49,8 +50,8 @@
     "npm": ">=6"
   },
   "lint-staged": {
-    "**/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "prettier --write --single-quote",
+    "src/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "npm run prettier",
       "git add"
     ]
   },

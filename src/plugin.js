@@ -7,6 +7,7 @@ export default class WaitCommandPlugin extends BasePlugin {
     const locatorArgs = JSON.parse(JSON.stringify(args));
     let originalRes;
     await this._find(driver, locatorArgs);
+    await this._elementDisplayed(driver);
     originalRes = await next();
     retryCount = 0;
     return originalRes;
@@ -39,6 +40,24 @@ export default class WaitCommandPlugin extends BasePlugin {
         await this._find(driver, locatorArgs);
       }
     }
+
+    if (json.sessionId) {
+      this.element = json.value.ELEMENT;
+      this.logger.info(
+        `Element with ${strategy} strategy for ${selector} selector found.`
+      );
+    }
+  }
+
+  async _elementDisplayed(driver) {
+    this.logger.info('Checking if element is displayed');
+    await fetch(
+      `${baseUrl}wd/hub/session/${driver.sessionId}/element/${this.element}/attribute/displayed`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   _getAutomationName(driver) {
@@ -50,7 +69,7 @@ export default class WaitCommandPlugin extends BasePlugin {
     if (automationName === 'XCuiTest') {
       return `${driver.wda.wdaBaseUrl}:${driver.wda.wdaLocalPort}/`;
     } else {
-      return `http://${driver[automationName].host}:${driver[automationName].systemPort}/`;
+      return `http://${driver.uiautomator2.host}:${driver.uiautomator2.systemPort}/`;
     }
   }
 }
