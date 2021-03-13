@@ -17,7 +17,7 @@ appium plugin install --source=npm appium-element-wait
 
 ## Installation - Client
 
-No special action is needed to make things work on the client side. Just keep sending in your unprefixed caps!
+No special action is needed to make things work on the client side.
 
 ## Activation
 
@@ -26,6 +26,10 @@ The plugin will not be active unless turned on when invoking the Appium server:
 ```
 appium --plugins=element-wait
 ```
+
+## Configuration
+
+To override the default element-wait retry set `capabilities.setCapability("appium:element-wait", 20);`. Default value is 30.
 
 ### Example
 
