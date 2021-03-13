@@ -41,7 +41,7 @@ export default class WaitCommandPlugin extends BasePlugin {
       }
     }
 
-    if (json.sessionId) {
+    if (json.sessionId && json.value.ELEMENT) {
       this.element = json.value.ELEMENT;
       this.logger.info(
         `Element with ${strategy} strategy for ${selector} selector found.`
@@ -51,13 +51,27 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async _elementDisplayed(driver) {
     this.logger.info('Checking if element is displayed');
-    await fetch(
+    const baseUrl = this._constructSessionUrl(driver);
+    const response = await fetch(
       `${baseUrl}wd/hub/session/${driver.sessionId}/element/${this.element}/attribute/displayed`,
       {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       }
     );
+    const json = await response.json();
+    if (json.value.error) {
+      if (retryCount !== 25) {
+        this.logger.info(
+          `Retrying to check whether ${this.element} element is displayed or not`
+        );
+        retryCount++;
+        await this._elementDisplayed(driver);
+      }
+    }
+    if (json.sessionId && json.value === 'true') {
+      this.logger.info(`Element with ${this.element} id is displayed.`);
+    }
   }
 
   _getAutomationName(driver) {
