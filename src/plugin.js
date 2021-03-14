@@ -20,7 +20,6 @@ export default class WaitCommandPlugin extends BasePlugin {
     const baseUrl = this._constructSessionUrl();
     const element = await this.elementState(baseUrl);
     if (element.value.error) {
-      console.log('----', this._getTimeout());
       if (retryCount !== this._getTimeout()) {
         this.logger.info(
           `Waiting for find element with ${this.strategy} strategy for ${this.selector} selector`
