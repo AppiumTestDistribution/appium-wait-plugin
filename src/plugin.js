@@ -9,7 +9,7 @@ export default class WaitCommandPlugin extends BasePlugin {
     const locatorArgs = JSON.parse(JSON.stringify(args));
     this.strategy = locatorArgs[0];
     this.selector = locatorArgs[1];
-    await this._find(locatorArgs);
+    await this._find();
     await this._elementDisplayed();
     originalRes = await next();
     retryCount = 0;
@@ -22,7 +22,7 @@ export default class WaitCommandPlugin extends BasePlugin {
     if (element.value.error) {
       if (retryCount !== this._getTimeout()) {
         this.logger.info(
-          `Waiting for find element with ${this.strategy} strategy for ${this.selector} selector`
+          `Waiting to find element with ${this.strategy} strategy for ${this.selector} selector`
         );
         retryCount++;
         await this._find();
