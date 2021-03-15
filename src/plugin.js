@@ -10,7 +10,6 @@ export default class WaitCommandPlugin extends BasePlugin {
     this.strategy = locatorArgs[0];
     this.selector = locatorArgs[1];
     await this._find();
-    await this._elementDisplayed();
     originalRes = await next();
     retryCount = 0;
     return originalRes;
@@ -35,6 +34,7 @@ export default class WaitCommandPlugin extends BasePlugin {
         `Element with ${this.strategy} strategy for ${this.selector} selector found.`
       );
       retryCount = 0;
+      await this._elementDisplayed(baseUrl);
     }
   }
 
@@ -55,17 +55,16 @@ export default class WaitCommandPlugin extends BasePlugin {
     return await response.json();
   }
 
-  async _elementDisplayed() {
+  async _elementDisplayed(baseUrl) {
     this.logger.info(`Checking if ${this.selector} element is displayed`);
-    const baseUrl = this._constructSessionUrl();
-    const response = await this.elementDisplayed(baseUrl);
+    const response = await this.elementDisplayStatus(baseUrl);
     if (response.value.error) {
       if (retryCount !== this._getTimeout()) {
         this.logger.info(
           `Retrying to check whether ${this.selector} element is displayed or not`
         );
         retryCount++;
-        await this._elementDisplayed();
+        await this._elementDisplayed(baseUrl);
       }
     }
     if (response.sessionId && response.value === 'true') {
@@ -74,7 +73,7 @@ export default class WaitCommandPlugin extends BasePlugin {
     }
   }
 
-  async elementDisplayed(baseUrl) {
+  async elementDisplayStatus(baseUrl) {
     const response = await fetch(
       `${baseUrl}wd/hub/session/${this.driver.sessionId}/element/${this.element}/attribute/displayed`,
       {

@@ -13,7 +13,16 @@
     "type": "git",
     "url": "git+https://github.com/saikrishna321/appium-wait-plugin.git"
   },
-  "author": "",
+  "contributors": [
+    {
+      "name": "Saikrishna",
+      "email": "saikrishna321@yahoo.com"
+    },
+    {
+      "name": "Srinivasan Sekar",
+      "email": "srinivasan.sekar1990@gmail.com"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/saikrishna321/appium-wait-plugin/issues"
