@@ -11,8 +11,7 @@ Appium version 2.0
 Install the plugin using Appium's plugin CLI, either as a named plugin or via NPM:
 
 ```
-appium plugin install element-wait
-appium plugin install --source=npm appium-element-wait
+appium plugin install --source=npm appium-wait-plugin
 ```
 
 ## Installation - Client
