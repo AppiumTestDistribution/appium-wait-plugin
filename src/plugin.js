@@ -1,5 +1,6 @@
 import BasePlugin from '@appium/base-plugin';
 import fetch from 'node-fetch';
+import log from './logger';
 
 let retryCount = 0;
 export default class WaitCommandPlugin extends BasePlugin {
@@ -9,7 +10,8 @@ export default class WaitCommandPlugin extends BasePlugin {
     const locatorArgs = JSON.parse(JSON.stringify(args));
     this.strategy = locatorArgs[0];
     this.selector = locatorArgs[1];
-    await this._find();
+    const element = await this._find();
+    await this._elementDisplayed(element);
     originalRes = await next();
     retryCount = 0;
     return originalRes;
@@ -20,68 +22,61 @@ export default class WaitCommandPlugin extends BasePlugin {
     const element = await this.elementState(baseUrl);
     if (element.value.error) {
       if (retryCount !== this._getTimeout()) {
-        this.logger.info(
+        log.info(
           `Waiting to find element with ${this.strategy} strategy for ${this.selector} selector`
         );
         retryCount++;
         await this._find();
       }
     }
+    console.log(element, element.sessionId, !element.value.error);
+    return element.value.ELEMENT;
+  }
 
-    if (element.sessionId && element.value.ELEMENT) {
-      this.element = element.value.ELEMENT;
-      this.logger.info(
-        `Element with ${this.strategy} strategy for ${this.selector} selector found.`
-      );
-      retryCount = 0;
-      await this._elementDisplayed(baseUrl);
-    }
+  async elementIsDisplayed(element) {
+    log.info(
+      `Element with ${this.strategy} strategy for ${this.selector} selector found.`
+    );
+    retryCount = 0;
+    log.info('Check if element is displayed');
+    await this.driver.elementDisplayed(element);
   }
 
   async elementState(baseUrl) {
+    console.log(baseUrl);
+    console.log(this.driver)
     const response = await fetch(
-      `${baseUrl}wd/hub/session/${this.driver.sessionId}/element`,
+      `${baseUrl}wd/hub/session/${this.driver.uiautomator2.jwproxy.sessionId}/element`,
       {
         body: JSON.stringify({
           strategy: this.strategy,
           selector: this.selector,
-          context: '',
+          context: "",
           multiple: false,
         }),
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       }
     );
     return await response.json();
   }
 
-  async _elementDisplayed(baseUrl) {
-    this.logger.info(`Checking if ${this.selector} element is displayed`);
-    const response = await this.elementDisplayStatus(baseUrl);
+  async _elementDisplayed(element) {
+    log.info(`Checking if ${this.selector} element is displayed`);
+    const response = await this.elementIsDisplayed(element);
     if (response.value.error) {
       if (retryCount !== this._getTimeout()) {
-        this.logger.info(
+        log.info(
           `Retrying to check whether ${this.selector} element is displayed or not`
         );
         retryCount++;
-        await this._elementDisplayed(baseUrl);
+        await this._elementDisplayed(element);
       }
     }
     if (response.sessionId && response.value === 'true') {
-      this.logger.info(`${this.selector} element is displayed.`);
+      log.info(`${this.selector} element is displayed.`);
       retryCount = 0;
     }
-  }
-
-  async elementDisplayStatus(baseUrl) {
-    const response = await fetch(
-      `${baseUrl}wd/hub/session/${this.driver.sessionId}/element/${this.element}/attribute/displayed`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-    return await response.json();
   }
 
   _getAutomationName() {
