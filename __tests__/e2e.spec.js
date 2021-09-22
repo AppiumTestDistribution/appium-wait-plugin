@@ -1,5 +1,4 @@
 import { remote } from 'webdriverio';
-import { command } from 'webdriver';
 
 const APPIUM_HOST = 'localhost';
 const APPIUM_PORT = 4723;
@@ -20,6 +19,7 @@ describe('Plugin Test', () => {
   it('Basic Plugin test', async () => {
     const driver = await remote({ ...WDIO_PARAMS, capabilities });
     await driver.$('~login').click();
+    await driver.$('~slider1').click();
     await driver.deleteSession();
   });
 });
