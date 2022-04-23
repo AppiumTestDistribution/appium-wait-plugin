@@ -2,6 +2,10 @@ import fetch from 'node-fetch';
 import log from './logger';
 import { waitUntil } from 'async-wait-until';
 
+const defaultConfig = {
+  timeout: '10000',
+  intervalBetweenAttempts: '500',
+};
 class Element {
   constructor(driver, args) {
     this.driver = driver;
@@ -9,6 +13,7 @@ class Element {
     this.strategy = locatorArgs[0];
     this.selector = locatorArgs[1];
     this.sessionInfo = this.sessionInfo(driver);
+    this._getTimeout();
   }
 
   async find() {
@@ -24,8 +29,8 @@ class Element {
       }
     };
     await waitUntil(predicate, {
-      timeout: '10000',
-      intervalBetweenAttempts: '2000',
+      timeout: defaultConfig.timeout,
+      intervalBetweenAttempts: defaultConfig.intervalBetweenAttempts,
     });
     if (element.value.ELEMENT) {
       let elementViewState = await this.elementIsDisplayed(
@@ -83,10 +88,13 @@ class Element {
   }
 
   _getTimeout() {
-    if (this.driver.caps['element-wait']) {
-      return (this.timeout = this.driver.caps['element-wait']);
-    } else {
-      return (this.timeout = 400);
+    if (this.driver.caps['element-wait-timeout']) {
+      return (defaultConfig.timeout = this.driver.caps['element-wait-timeout']);
+    }
+    if (this.driver.caps['intervalBetweenAttempts']) {
+      return (defaultConfig.intervalBetweenAttempts = this.driver.caps[
+        'intervalBetweenAttempts'
+      ]);
     }
   }
 }

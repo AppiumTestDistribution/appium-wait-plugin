@@ -28,7 +28,9 @@ appium --plugins=element-wait
 
 ## Configuration
 
-To override the default element-wait retry set `capabilities.setCapability("appium:element-wait", 20);`. Default value is 30.
+To override the default element-wait retry set `capabilities.setCapability("appium:element-wait-timeout", 20000);`. Default value is 10000 in milliseonds.
+
+To override the default element-wait retry interval set `capabilities.setCapability("appium:intervalBetweenAttempts", 200)` in milleseonds
 
 ### Example
 
