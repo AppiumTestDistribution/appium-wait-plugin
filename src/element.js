@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import log from './logger';
+import { waitUntil } from 'async-wait-until';
 
-let retryCount = 0;
 class Element {
   constructor(driver, args) {
     this.driver = driver;
@@ -13,30 +13,42 @@ class Element {
 
   async find() {
     const element = await this.elementState();
-    if (element.value.error) {
-      if (retryCount !== this._getTimeout()) {
+    const predicate = async () => {
+      if ((await this.elementState()).value.error == undefined) {
+        return true;
+      } else {
         log.info(
           `Waiting to find element with ${this.strategy} strategy for ${this.selector} selector`
         );
-        retryCount++;
-        await this.find();
+        return false;
       }
+    };
+    await waitUntil(predicate, {
+      timeout: '10000',
+      intervalBetweenAttempts: '2000',
+    });
+    if (element.value.ELEMENT) {
+      let elementViewState = await this.elementIsDisplayed(
+        element.value.ELEMENT
+      );
+      if (!elementViewState)
+        log.error(
+          'Element was not displayed! Please make sure the element is in viewport to perform an action'
+        );
     }
-    if (element.value.ELEMENT) await this.isDisplayed(element.value.ELEMENT);
   }
 
   async elementIsDisplayed(element) {
     log.info(
       `Element with ${this.strategy} strategy for ${this.selector} selector found.`
     );
-    retryCount = 0;
     log.info('Check if element is displayed');
     return await this.driver.elementDisplayed(element);
   }
 
   async elementState() {
     const response = await fetch(
-      `${this.sessionInfo.baseUrl}wd/hub/session/${this.sessionInfo.jwProxySession}/element`,
+      `${this.sessionInfo.baseUrl}session/${this.sessionInfo.jwProxySession}/element`,
       {
         body: JSON.stringify({
           strategy: this.strategy,
@@ -49,24 +61,6 @@ class Element {
       }
     );
     return await response.json();
-  }
-
-  async isDisplayed(element) {
-    log.info(`Checking if ${this.selector} element is displayed`);
-    const response = await this.elementIsDisplayed(element);
-    if (!response) {
-      if (retryCount !== this._getTimeout()) {
-        log.info(
-          `Retrying to check whether ${this.selector} element is displayed or not`
-        );
-        retryCount++;
-        await this.isDisplayed(element);
-      }
-    }
-    if (response) {
-      log.info(`${this.selector} element is displayed.`);
-      retryCount = 0;
-    }
   }
 
   _getAutomationName() {
@@ -92,7 +86,7 @@ class Element {
     if (this.driver.caps['element-wait']) {
       return (this.timeout = this.driver.caps['element-wait']);
     } else {
-      return (this.timeout = 30);
+      return (this.timeout = 400);
     }
   }
 }
