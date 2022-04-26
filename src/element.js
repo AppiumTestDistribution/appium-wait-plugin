@@ -97,6 +97,11 @@ class Element {
       ]);
     }
   }
+
+  async handle(next, driver, cmdName, ...args) {
+    console.log(cmdName, ...args);
+    return await next();
+  }
 }
 
 export default Element;
