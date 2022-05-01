@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
-    "@appium/base-plugin": "^1.6.4",
+    "@appium/base-plugin": "^1.8.4",
     "async-wait-until": "^2.0.12",
     "node-fetch": "^2.6.1"
   },

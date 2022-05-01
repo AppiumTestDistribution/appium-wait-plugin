@@ -13,7 +13,8 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Documents/git/AppiumSample/VodQA.apk',
+  'appium:app':
+    'https://github.com/shridharkalagi/AppiumSample/blob/master/VodQA.apk?raw=true',
 };
 describe('Plugin Test', () => {
   it('Basic Plugin test', async () => {

@@ -17,10 +17,10 @@ class Element {
   }
 
   async find() {
-    const element = await this.elementState();
     const predicate = async () => {
-      if ((await this.elementState()).value.error == undefined) {
-        return true;
+      const ele = await this.elementState();
+      if (ele.value.error == undefined) {
+        return ele;
       } else {
         log.info(
           `Waiting to find element with ${this.strategy} strategy for ${this.selector} selector`
@@ -28,7 +28,7 @@ class Element {
         return false;
       }
     };
-    await waitUntil(predicate, {
+    const element = await waitUntil(predicate, {
       timeout: defaultConfig.timeout,
       intervalBetweenAttempts: defaultConfig.intervalBetweenAttempts,
     });
@@ -36,9 +36,10 @@ class Element {
       let elementViewState = await this.elementIsDisplayed(
         element.value.ELEMENT
       );
+      if (elementViewState) log.info('Element is displayed!');
       if (!elementViewState)
-        log.error(
-          'Element was not displayed! Please make sure the element is in viewport to perform an action'
+        throw new Error(
+          'Element was not displayed! Please make sure the element is in viewport to perform the action'
         );
     }
   }
@@ -89,16 +90,17 @@ class Element {
 
   _getTimeout() {
     if (this.driver.caps['element-wait-timeout']) {
-      return (defaultConfig.timeout = this.driver.caps['element-wait-timeout']);
+      defaultConfig.timeout = this.driver.caps['element-wait-timeout'];
     }
     if (this.driver.caps['intervalBetweenAttempts']) {
-      return (defaultConfig.intervalBetweenAttempts = this.driver.caps[
+      defaultConfig.intervalBetweenAttempts = this.driver.caps[
         'intervalBetweenAttempts'
-      ]);
+      ];
     }
   }
 
   async handle(next, driver, cmdName, ...args) {
+    console.log('Inside handle');
     console.log(cmdName, ...args);
     return await next();
   }
