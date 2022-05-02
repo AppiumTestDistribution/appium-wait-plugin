@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --require ts-node/register -p __tests__/e2e.spec.js --timeout 60000",
     "build": "npx tsc",
-    "prettier": "prettier --write --single-quote",
+    "prettier": "prettier src --write --single-quote",
     "uninstall": "(appium plugin uninstall element-wait || exit 0)",
     "plugin:install": "appium plugin install --source=local $(pwd)",
     "plugin:installer": "npm run uninstall && npm run build && npm run plugin:install && appium server -ka 800 --use-plugins=element-wait -pa /wd/hub"
