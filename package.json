@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
-    "@appium/base-plugin": "^1.8.4",
+    "@appium/base-plugin": "^1.9.2",
     "async-wait-until": "^2.0.12",
     "node-fetch": "^2.6.1"
   },
@@ -53,8 +53,8 @@
     "mocha": "^8.3.2",
     "prettier": "^2.0.5",
     "sinon": "^11.0.0",
-    "ts-node": "^10.0.0",
-    "typescript": "^4.2.3",
+    "ts-node": "10.8.1",
+    "typescript": "4.7.3",
     "webdriverio": "7.12.5"
   },
   "appium": {
