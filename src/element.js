@@ -79,7 +79,7 @@ function sessionInfo(driver, strategy, selector) {
   const automationName = _getAutomationName(driver);
   if (automationName === 'XCuiTest') {
     return {
-      baseUrl: `${driver.wda.webDriverAgentUrl}`,
+      baseUrl: `http://${driver.wda.webDriverAgentUrl}`,
       jwProxySession: driver.wda.jwproxy.sessionId,
       body: JSON.stringify({
         using: strategy,
