@@ -55,21 +55,15 @@ export async function find(driver, args) {
 
 async function elementIsDisplayed(driver, element) {
   log.info('Check if element is displayed');
-  console.log(driver);
   return await driver.elementDisplayed(element);
 }
 
 async function elementState(driver, strategy, selector) {
-  const sessionDetails = sessionInfo(driver);
+  const sessionDetails = sessionInfo(driver, strategy, selector);
   const response = await fetch(
     `${sessionDetails.baseUrl}session/${sessionDetails.jwProxySession}/element`,
     {
-      body: JSON.stringify({
-        strategy,
-        selector,
-        context: '',
-        multiple: false,
-      }),
+      body: sessionDetails.body,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     }
@@ -81,17 +75,27 @@ function _getAutomationName(driver) {
   return driver.caps.automationName;
 }
 
-function sessionInfo(driver) {
+function sessionInfo(driver, strategy, selector) {
   const automationName = _getAutomationName(driver);
   if (automationName === 'XCuiTest') {
     return {
-      baseUrl: `${driver.wda.wdaBaseUrl}:${driver.wda.wdaLocalPort}/`,
+      baseUrl: `${driver.wda.webDriverAgentUrl}`,
       jwProxySession: driver.wda.jwproxy.sessionId,
+      body: JSON.stringify({
+        using: strategy,
+        value: selector,
+      }),
     };
   } else {
     return {
       baseUrl: `http://${driver.uiautomator2.host}:${driver.uiautomator2.systemPort}/`,
       jwProxySession: driver.uiautomator2.jwproxy.sessionId,
+      body: JSON.stringify({
+        strategy,
+        selector,
+        context: '',
+        multiple: false,
+      }),
     };
   }
 }
