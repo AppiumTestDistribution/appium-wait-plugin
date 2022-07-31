@@ -8,8 +8,8 @@
     "build": "npx tsc",
     "prettier": "prettier src --write --single-quote",
     "uninstall": "(appium plugin uninstall element-wait || exit 0)",
-    "plugin:install": "appium plugin install --source=local $(pwd)",
-    "plugin:installer": "npm run uninstall && npm run build && npm run plugin:install && appium server -ka 800 --use-plugins=element-wait -pa /wd/hub"
+    "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
+    "reinstall-plugin": "(appium plugin uninstall element-wait || exit 0) && npm run install-plugin"
   },
   "repository": {
     "type": "git",
@@ -32,6 +32,7 @@
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
     "@appium/base-plugin": "^1.9.2",
+    "@appium/support": "^2.55.2",
     "async-wait-until": "^2.0.12",
     "node-fetch": "^2.6.1"
   },
