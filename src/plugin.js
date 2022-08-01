@@ -6,4 +6,13 @@ export default class WaitCommandPlugin extends BasePlugin {
     await find(driver, args);
     return await next();
   }
+
+  static fakeRoute(req, res) {
+    res.send(JSON.stringify({ fake: 'fakeResponse' }));
+  }
+
+  // eslint-disable-next-line no-unused-vars,require-await
+  static async updateServer(expressApp, httpServer) {
+    expressApp.all('/fake', WaitCommandPlugin.fakeRoute);
+  }
 }

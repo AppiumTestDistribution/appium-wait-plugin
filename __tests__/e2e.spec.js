@@ -1,26 +1,27 @@
-import { remote } from 'webdriverio';
+import { main as startAppium } from 'appium';
+var chai = require('chai'),
+  // eslint-disable-next-line no-unused-vars
+  should = chai.should();
+import axios from 'axios';
 
 const APPIUM_HOST = 'localhost';
-const APPIUM_PORT = 4723;
-const WDIO_PARAMS = {
-  connectionRetryCount: 0,
-  hostname: APPIUM_HOST,
-  port: APPIUM_PORT,
-  path: '/wd/hub/',
-  logLevel: 'silent',
-};
-const capabilities = {
-  platformName: 'Android',
-  'appium:uiautomator2ServerInstallTimeout': '50000',
-  'appium:automationName': 'UIAutomator2',
-  'appium:app':
-    'https://github.com/shridharkalagi/AppiumSample/blob/master/VodQA.apk?raw=true',
-};
+let server;
 describe('Plugin Test', () => {
+  beforeEach('Start Server', async () => {
+    const port = '4723';
+    const args = {
+      port,
+      address: APPIUM_HOST,
+      usePlugins: ['element-wait'],
+    };
+    server = await startAppium(args);
+  });
   it('Basic Plugin test', async () => {
-    const driver = await remote({ ...WDIO_PARAMS, capabilities });
-    await driver.$('~login').click();
-    await driver.$('~slider1').click();
-    await driver.deleteSession();
+    const res = { fake: 'fakeResponse' };
+    (await axios.post('http://localhost:4723/fake')).data.should.eql(res);
+  });
+
+  afterEach('Stop server', async () => {
+    if (server) await server.close();
   });
 });
