@@ -12,11 +12,13 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    name: E2E tests - ${{ matrix.os }} - ${{ matrix.node_version }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         node-version: [16.x]
+        os: [ubuntu-latest, windows-latest]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
