@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    name: Unit tests - ${{ matrix.os }} - ${{ matrix.node_version }}
+    name: E2E tests - ${{ matrix.os }} - ${{ matrix.node_version }}
     runs-on: ${{ matrix.os }}
 
     strategy:
