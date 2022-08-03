@@ -5,15 +5,18 @@ var chai = require('chai'),
 import axios from 'axios';
 
 const APPIUM_HOST = 'localhost';
+const FAKE_ARGS = { sillyWebServerPort: 1234, host: 'hey' };
+const FAKE_PLUGIN_ARGS = { fake: FAKE_ARGS };
 let server;
 describe('Plugin Test', () => {
   beforeEach('Start Server', async () => {
     const port = '4723';
-    const args = {
+    const baseArgs = {
       port,
       address: APPIUM_HOST,
       usePlugins: ['element-wait'],
     };
+    const args = { ...baseArgs, plugin: FAKE_PLUGIN_ARGS };
     server = await startAppium(args);
   });
   it('Basic Plugin test', async () => {

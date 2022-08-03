@@ -42,7 +42,7 @@
     "@types/lodash": "^4.14.170",
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.6.1",
-    "appium": "2.0.0-beta.40",
+    "appium": "2.0.0-beta.42",
     "axios": "0.27.2",
     "babel-eslint": "^10.0.1",
     "chai": "^4.1.0",
@@ -58,12 +58,23 @@
     "sinon": "^11.0.0",
     "ts-node": "10.8.1",
     "typescript": "4.7.3",
-    "webdriverio": "7.12.5",
-    "appium-wait-plugin": "file:."
+    "webdriverio": "7.12.5"
   },
   "appium": {
     "pluginName": "element-wait",
-    "mainClass": "WaitCommandPlugin"
+    "mainClass": "WaitCommandPlugin",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "additionalProperties": false,
+      "description": "Appium configuration schema for the wait plugin.",
+      "properties": {
+        "wait": {
+          "type": "string"
+        }
+      },
+      "title": "Appium waitplugin",
+      "type": "object"
+    }
   },
   "engines": {
     "node": ">=14",
