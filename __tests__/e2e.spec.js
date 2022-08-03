@@ -24,6 +24,11 @@ describe('Plugin Test', () => {
     (await axios.post('http://localhost:4723/fake')).data.should.eql(res);
   });
 
+  it('Basic Plugin test with Args', async () => {
+    const res = { fake: 'fakeResponse' };
+    (await axios.post('http://localhost:4723/fakeArgs')).data.should.eql(res);
+  });
+
   afterEach('Stop server', async () => {
     if (server) await server.close();
   });
