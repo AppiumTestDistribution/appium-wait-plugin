@@ -23,14 +23,20 @@ No special action is needed to make things work on the client side.
 The plugin will not be active unless turned on when invoking the Appium server:
 
 ```
-appium --plugins=element-wait
+appium --use-plugins=element-wait
 ```
 
 ## Configuration
 
-To override the default element-wait retry set `capabilities.setCapability("appium:element-wait-timeout", 20000);`. Default value is 10000 in milliseonds.
+To override the default element-wait retry
 
-To override the default element-wait retry interval set `capabilities.setCapability("appium:intervalBetweenAttempts", 200)` in milleseonds
+	1. Use appium server config file. Refere here.
+	2. Use appium server CLI 
+
+
+	--plugin-element-wait-timeout=30000
+	--plugin-element-wait-interval-between-attempts=200
+	
 
 ### Example
 
