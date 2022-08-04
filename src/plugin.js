@@ -3,7 +3,8 @@ import { find } from './element';
 
 export default class WaitCommandPlugin extends BasePlugin {
   async findElement(next, driver, ...args) {
-    await find(driver, args);
+    let commandLineArgs = this.cliArgs;
+    await find(driver, args, commandLineArgs);
     return await next();
   }
 
