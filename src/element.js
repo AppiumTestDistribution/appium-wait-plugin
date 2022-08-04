@@ -7,8 +7,8 @@ const defaultConfig = {
   intervalBetweenAttempts: '500',
 };
 
-export async function find(driver, args) {
-  _getTimeout(driver);
+export async function find(driver, args, cliArgs) {
+  _getTimeout(cliArgs);
   const locatorArgs = JSON.parse(JSON.stringify(args));
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
@@ -17,9 +17,7 @@ export async function find(driver, args) {
     if (ele.value.error == undefined) {
       return ele;
     } else {
-      log.info(
-        `Waiting to find element with ${strategy} strategy for ${selector} selector`
-      );
+      log.info(`Waiting to find element with ${strategy} strategy for ${selector} selector`);
       return false;
     }
   };
@@ -29,13 +27,8 @@ export async function find(driver, args) {
       intervalBetweenAttempts: defaultConfig.intervalBetweenAttempts,
     });
     if (element.value.ELEMENT) {
-      log.info(
-        `Element with ${strategy} strategy for ${selector} selector found.`
-      );
-      let elementViewState = await elementIsDisplayed(
-        driver,
-        element.value.ELEMENT
-      );
+      log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
+      let elementViewState = await elementIsDisplayed(driver, element.value.ELEMENT);
       if (elementViewState) log.info('Element is displayed!');
       if (!elementViewState)
         throw new Error(
@@ -100,12 +93,16 @@ function sessionInfo(driver, strategy, selector) {
   }
 }
 
-function _getTimeout(driver) {
-  if (driver.caps['element-wait-timeout']) {
-    defaultConfig.timeout = driver.caps['element-wait-timeout'];
+function _getTimeout(cliArgs) {
+  if (cliArgs.timeout != undefined && cliArgs.timeout !== defaultConfig.timeout) {
+    defaultConfig.timeout = cliArgs.timeout;
+    log.info(`Timeout is set to ${defaultConfig.timeout}`);
   }
-  if (driver.caps['intervalBetweenAttempts']) {
-    defaultConfig.intervalBetweenAttempts =
-      driver.caps['intervalBetweenAttempts'];
+  if (
+    cliArgs.intervalBetweenAttempts != undefined &&
+    cliArgs.intervalBetweenAttempts !== defaultConfig.intervalBetweenAttempts
+  ) {
+    defaultConfig.intervalBetweenAttempts = cliArgs.intervalBetweenAttempts;
+    log.info(`Internal between attempts is set to ${defaultConfig.intervalBetweenAttempts}`);
   }
 }

@@ -1,0 +1,11 @@
+{
+  "server": {
+    "port": 31337,
+    "plugin": {
+      "element-wait": {
+        "timeout": 20000,
+        "intervalBetweenAttempts": 200
+      }
+    }
+  }
+}

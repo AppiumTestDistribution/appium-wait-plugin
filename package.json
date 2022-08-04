@@ -1,10 +1,11 @@
 {
   "name": "appium-wait-plugin",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "An appium 2.0 plugin that waits for element to be found",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register -p __tests__/e2e.spec.js --timeout 60000",
+    "test": "mocha --require ts-node/register -p __tests__/plugin.spec.js --timeout 60000",
+    "test-e2e": "mocha --require ts-node/register -p __tests__/e2e.spec.js --timeout 60000",
     "build": "npx tsc",
     "prettier": "prettier src --write --single-quote",
     "uninstall": "(appium plugin uninstall element-wait || exit 0)",
@@ -43,6 +44,8 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.6.1",
     "appium": "2.0.0-beta.42",
+    "appium-uiautomator2-driver": "^2.4.6",
+    "appium-wait-plugin": "file:.",
     "axios": "0.27.2",
     "babel-eslint": "^10.0.1",
     "chai": "^4.1.0",
@@ -58,8 +61,7 @@
     "sinon": "^11.0.0",
     "ts-node": "10.8.1",
     "typescript": "4.7.3",
-    "webdriverio": "7.12.5",
-    "appium-wait-plugin": "file:."
+    "webdriverio": "7.12.5"
   },
   "appium": {
     "pluginName": "element-wait",
@@ -69,8 +71,11 @@
       "additionalProperties": false,
       "description": "Appium configuration schema for the wait plugin.",
       "properties": {
-        "wait": {
-          "type": "string"
+        "timeout": {
+          "type": "number"
+        },
+        "intervalBetweenAttempts": {
+          "type": "number"
         }
       },
       "title": "Appium waitplugin",

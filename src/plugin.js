@@ -3,7 +3,8 @@ import { find } from './element';
 
 export default class WaitCommandPlugin extends BasePlugin {
   async findElement(next, driver, ...args) {
-    await find(driver, args);
+    let commandLineArgs = this.cliArgs;
+    await find(driver, args, commandLineArgs);
     return await next();
   }
 
@@ -14,10 +15,5 @@ export default class WaitCommandPlugin extends BasePlugin {
   // eslint-disable-next-line no-unused-vars,require-await
   static async updateServer(expressApp, httpServer) {
     expressApp.all('/fake', WaitCommandPlugin.fakeRoute);
-    expressApp.all('/fakeArgs', WaitCommandPlugin.fakeRouteArgs);
-  }
-
-  static fakeRouteArgs(req, res) {
-    res.send(JSON.stringify({ fake: this.cliArgs }));
   }
 }
