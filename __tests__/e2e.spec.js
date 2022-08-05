@@ -22,6 +22,10 @@ describe('Plugin Test', () => {
   });
 
   it('Vertical swipe test', async () => {
+    await driver.$('~username').isEnabled();
+    await driver.$('~username').click();
+    await driver.$('~username').clearValue();
+    await driver.$('~username').setValue('admin');
     await driver.$('~login').click();
     await driver.$('~verticalSwipe').click();
   });
