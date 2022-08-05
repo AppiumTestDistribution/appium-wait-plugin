@@ -1,5 +1,13 @@
 # appium-wait-plugin
 
+<h1 align="center">
+	<br>
+	<img src="images/AppiumWait2.gif" alt="AppiumWait2">
+	<br>
+	<br>
+	<br>
+</h1>
+
 This is an Appium plugin designed to wait for element to be present.
 
 ## Prerequisite
