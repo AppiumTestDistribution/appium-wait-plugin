@@ -46,6 +46,33 @@ export async function find(driver, args, cliArgs) {
   }
 }
 
+export async function elementEnabled(driver) {
+  const predicate = async () => {
+    const element = await driver.elementEnabled();
+    console.log(element);
+    if (element.value === 'true') {
+      return element;
+    } else {
+      log.info('Waiting to find element to be enabled');
+      return false;
+    }
+  };
+
+  try {
+    await waitUntil(predicate, {
+      timeout: defaultConfig.timeout,
+      intervalBetweenAttempts: defaultConfig.intervalBetweenAttempts,
+    });
+  } catch (e) {
+    if (e instanceof TimeoutError) {
+      throw new Error(
+        `Time out after waiting for element to be enabled for ${defaultConfig.timeout}`
+      );
+    } else {
+      console.error(e);
+    }
+  }
+}
 async function elementIsDisplayed(driver, element) {
   log.info('Check if element is displayed');
   return await driver.elementDisplayed(element);
