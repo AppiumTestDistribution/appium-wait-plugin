@@ -42,7 +42,7 @@
     "@types/chai": "^4.2.16",
     "@types/lodash": "^4.14.170",
     "@types/mocha": "^8.2.2",
-    "@types/node": "^15.6.1",
+    "@types/node": "^18.6.4",
     "appium": "2.0.0-beta.42",
     "appium-uiautomator2-driver": "^2.4.6",
     "appium-wait-plugin": "file:.",
