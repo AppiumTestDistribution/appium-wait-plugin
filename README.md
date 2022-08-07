@@ -37,15 +37,12 @@ appium --use-plugins=element-wait
 ## Configuration
 
 To override the default element-wait retry
-
-	1. Use appium server config file. Refere here.
-	2. Use appium server CLI 
-
-
+1. Use appium server CLI
 	--plugin-element-wait-timeout=30000
 	--plugin-element-wait-interval-between-attempts=200
 	
 
+2. Use appium server config file. [Refer](https://github.com/AppiumTestDistribution/appium-wait-plugin/blob/main/server-config.json). 
 ### Example
 
 
