@@ -9,8 +9,6 @@ export default class WaitCommandPlugin extends BasePlugin {
   }
 
   async handle(next, driver, cmdName, ...args) {
-    console.log('CommandName', cmdName);
-    console.log('Args', args);
     const includeCommands = ['click', 'setValue', 'clear'];
     if (includeCommands.includes(cmdName)) {
       log.info('Wait for element to be clickable');

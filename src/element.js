@@ -49,7 +49,6 @@ export async function find(driver, args, cliArgs) {
 export async function elementEnabled(driver) {
   const predicate = async () => {
     const element = await driver.elementEnabled();
-    console.log(element);
     if (element.value === 'true') {
       return element;
     } else {
