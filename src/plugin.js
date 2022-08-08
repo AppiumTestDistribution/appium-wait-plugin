@@ -2,6 +2,12 @@ import BasePlugin from '@appium/base-plugin';
 import { find, elementEnabled, setWait } from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
+
+  constructor(name) {
+    super();
+    this.name = name;
+    console.log('CLI Args', this.cliArgs);
+  }
   // this plugin supports a non-standard 'compare images' command
   static newMethodMap = {
     '/session/:sessionId/waitplugin/timeout': {
