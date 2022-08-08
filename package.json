@@ -32,12 +32,11 @@
   },
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
-    "@appium/base-plugin": "^1.9.2",
-    "@appium/support": "^2.55.2",
     "async-wait-until": "^2.0.12",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
+    "@appium/fake-driver": "^4.1.0",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@types/chai": "^4.2.16",
     "@types/lodash": "^4.14.170",
@@ -45,7 +44,6 @@
     "@types/node": "^18.6.4",
     "appium": "2.0.0-beta.42",
     "appium-uiautomator2-driver": "^2.4.6",
-    "appium-wait-plugin": "file:.",
     "axios": "0.27.2",
     "babel-eslint": "^10.0.1",
     "chai": "^4.1.0",
@@ -62,6 +60,9 @@
     "ts-node": "10.8.1",
     "typescript": "4.7.3",
     "webdriverio": "7.20.9"
+  },
+  "peerDependencies": {
+    "appium": "^2.0.0-beta.42"
   },
   "appium": {
     "pluginName": "element-wait",
