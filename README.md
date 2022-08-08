@@ -1,4 +1,4 @@
-# appium-wait-plugin
+# appium-wait-plugin [![npm version](https://badge.fury.io/js/appium-wait-plugin.svg)](https://badge.fury.io/js/appium-wait-plugin)
 
 <h1 align="center">
 	<br>
