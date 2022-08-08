@@ -12,7 +12,7 @@ export default class WaitCommandPlugin extends BasePlugin {
     const includeCommands = ['click', 'setValue', 'clear'];
     if (includeCommands.includes(cmdName)) {
       log.info('Wait for element to be clickable');
-      await elementEnabled(driver);
+      await elementEnabled(driver, args[0]);
       log.info('Element is enabled');
     }
     return await next();

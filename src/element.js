@@ -2,13 +2,13 @@ import fetch from 'node-fetch';
 import log from './logger';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 
-const defaultConfig = {
-  timeout: '10000',
-  intervalBetweenAttempts: '500',
-};
+let map = new Map();
 
-export async function find(driver, args, cliArgs) {
-  _getTimeout(cliArgs);
+export async function find(driver, args) {
+  const elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
+  const session = driver.sessionId;
+  _setTimeout(elementWaitProps, session);
+  let timeoutProp = _getTimeout(session);
   const locatorArgs = JSON.parse(JSON.stringify(args));
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
@@ -22,10 +22,7 @@ export async function find(driver, args, cliArgs) {
     }
   };
   try {
-    const element = await waitUntil(predicate, {
-      timeout: defaultConfig.timeout,
-      intervalBetweenAttempts: defaultConfig.intervalBetweenAttempts,
-    });
+    const element = await waitUntil(predicate, timeoutProp);
     if (element.value.ELEMENT) {
       log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
       let elementViewState = await elementIsDisplayed(driver, element.value.ELEMENT);
@@ -38,7 +35,7 @@ export async function find(driver, args, cliArgs) {
   } catch (e) {
     if (e instanceof TimeoutError) {
       throw new Error(
-        `Time out after waiting for element ${selector} for ${defaultConfig.timeout}`
+        `Time out after waiting for element ${selector} for ${timeoutProp.timeout} ms`
       );
     } else {
       console.error(e);
@@ -46,10 +43,11 @@ export async function find(driver, args, cliArgs) {
   }
 }
 
-export async function elementEnabled(driver) {
+export async function elementEnabled(driver, el) {
+  let timeoutProp = _getTimeout(driver.sessionId);
   const predicate = async () => {
-    const element = await driver.elementEnabled();
-    if (element.value === 'true') {
+    const element = await driver.elementEnabled(el);
+    if (element) {
       return element;
     } else {
       log.info('Waiting to find element to be enabled');
@@ -58,14 +56,11 @@ export async function elementEnabled(driver) {
   };
 
   try {
-    await waitUntil(predicate, {
-      timeout: defaultConfig.timeout,
-      intervalBetweenAttempts: defaultConfig.intervalBetweenAttempts,
-    });
+    await waitUntil(predicate, timeoutProp);
   } catch (e) {
     if (e instanceof TimeoutError) {
       throw new Error(
-        `Time out after waiting for element to be enabled for ${defaultConfig.timeout}`
+        `Time out after waiting for element to be enabled for ${timeoutProp.timeout}`
       );
     } else {
       console.error(e);
@@ -119,16 +114,34 @@ function sessionInfo(driver, strategy, selector) {
   }
 }
 
-function _getTimeout(cliArgs) {
-  if (cliArgs.timeout != undefined && cliArgs.timeout !== defaultConfig.timeout) {
-    defaultConfig.timeout = cliArgs.timeout;
-    log.info(`Timeout is set to ${defaultConfig.timeout}`);
+function _setTimeout(elementWaitProps, session) {
+  if (!map.has(session)) {
+    log.info(`Timeout properties not set for session ${session}, trying to set one`);
+    let defaultTimeoutProp = {
+      timeout: 10000,
+      intervalBetweenAttempts: 500,
+    };
+    if (
+      elementWaitProps.timeout != undefined &&
+      elementWaitProps.timeout !== defaultTimeoutProp.timeout
+    ) {
+      defaultTimeoutProp.timeout = elementWaitProps.timeout;
+      log.info(`Timeout is set to ${defaultTimeoutProp.timeout}`);
+    }
+    if (
+      elementWaitProps.intervalBetweenAttempts != undefined &&
+      elementWaitProps.intervalBetweenAttempts !== defaultTimeoutProp.intervalBetweenAttempts
+    ) {
+      defaultTimeoutProp.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
+      log.info(`Internal between attempts is set to ${defaultTimeoutProp.intervalBetweenAttempts}`);
+    }
+    map.set(session, defaultTimeoutProp);
   }
-  if (
-    cliArgs.intervalBetweenAttempts != undefined &&
-    cliArgs.intervalBetweenAttempts !== defaultConfig.intervalBetweenAttempts
-  ) {
-    defaultConfig.intervalBetweenAttempts = cliArgs.intervalBetweenAttempts;
-    log.info(`Internal between attempts is set to ${defaultConfig.intervalBetweenAttempts}`);
-  }
+  log.info(
+    `Timeout properties set for session ${session} is ${JSON.stringify(_getTimeout(session))} ms`
+  );
+}
+
+function _getTimeout(session) {
+  return map.get(session);
 }
