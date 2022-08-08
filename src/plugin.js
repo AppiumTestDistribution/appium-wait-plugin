@@ -2,9 +2,8 @@ import BasePlugin from '@appium/base-plugin';
 import { find, elementEnabled, setWait } from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
-
   constructor(name) {
-    super();
+    super(name);
     this.name = name;
     console.log('CLI Args', this.cliArgs);
   }

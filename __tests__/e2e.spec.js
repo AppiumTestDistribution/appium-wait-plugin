@@ -12,7 +12,8 @@ const capabilities = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '50000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app': '/Users/saikrisv/Downloads/VodQA.apk',
+  'appium:app':
+    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
 };
 let driver;
 
@@ -22,7 +23,7 @@ describe('Plugin Test', () => {
   });
 
   it('Vertical swipe test', async () => {
-    await driver.setWaitPluginTimeout('data', { timeout: 1111, intervalBetweenAttempts: 11 });
+    //await driver.setWaitPluginTimeout('data', { timeout: 1111, intervalBetweenAttempts: 11 });
     await driver.$('~username').click();
     await driver.$('~username').clearValue();
     await driver.$('~username').setValue('admin');
@@ -35,17 +36,17 @@ describe('Plugin Test', () => {
   });
 });
 
-driver.addCommand(
-  'setWaitPluginTimeout',
-  command('POST', '/session/:sessionId/waitplugin/timeout', {
-    command: 'setWaitPluginTimeout',
-    parameters: [
-      {
-        name: 'data',
-        type: 'object',
-        description: 'a valid parameter',
-        required: true,
-      },
-    ],
-  })
-);
+// driver.addCommand(
+//   'setWaitPluginTimeout',
+//   command('POST', '/session/:sessionId/waitplugin/timeout', {
+//     command: 'setWaitPluginTimeout',
+//     parameters: [
+//       {
+//         name: 'data',
+//         type: 'object',
+//         description: 'a valid parameter',
+//         required: true,
+//       },
+//     ],
+//   })
+// );

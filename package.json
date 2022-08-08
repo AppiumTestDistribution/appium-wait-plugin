@@ -32,8 +32,6 @@
   },
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
-    "@appium/base-plugin": "^1.9.2",
-    "@appium/support": "^2.55.2",
     "async-wait-until": "^2.0.12",
     "node-fetch": "^2.6.1"
   },
@@ -62,6 +60,9 @@
     "ts-node": "10.8.1",
     "typescript": "4.7.3",
     "webdriverio": "7.20.9"
+  },
+  "peerDependencies": {
+    "appium": "^2.0.0-beta.42"
   },
   "appium": {
     "pluginName": "element-wait",
