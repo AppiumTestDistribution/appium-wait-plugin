@@ -14,6 +14,8 @@ This is an Appium plugin designed to wait for element to be present.
 
 Appium version 2.0
 
+Tested with appium v2.0.0-beta.42
+
 ## Installation - Server
 
 Install the plugin using Appium's plugin CLI, either as a named plugin or via NPM:

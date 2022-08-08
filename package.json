@@ -1,6 +1,6 @@
 {
   "name": "appium-wait-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An appium 2.0 plugin that waits for element to be found",
   "main": "./lib/index.js",
   "scripts": {
@@ -84,7 +84,7 @@
   },
   "engines": {
     "node": ">=14",
-    "npm": ">=6"
+    "npm": ">=8"
   },
   "lint-staged": {
     "src/*.{js,jsx,ts,tsx,json,css,scss,md}": [
