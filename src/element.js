@@ -43,6 +43,10 @@ export async function find(driver, args) {
   }
 }
 
+export async function setWait(driver, args) {
+  _setTimeout(args[0], driver.sessionId, true);
+}
+
 export async function elementEnabled(driver, el) {
   let timeoutProp = _getTimeout(driver.sessionId);
   const predicate = async () => {
@@ -114,12 +118,16 @@ function sessionInfo(driver, strategy, selector) {
   }
 }
 
-function _setTimeout(elementWaitProps, session) {
+function _setTimeout(elementWaitProps, session, overrideTimeout = false) {
+  if (overrideTimeout && map.has(session)) {
+    map.delete(session);
+  }
   if (!map.has(session)) {
     log.info(`Timeout properties not set for session ${session}, trying to set one`);
     let defaultTimeoutProp = {
       timeout: 10000,
       intervalBetweenAttempts: 500,
+      overrideTimeout,
     };
     if (
       elementWaitProps.timeout != undefined &&

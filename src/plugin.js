@@ -1,7 +1,22 @@
 import BasePlugin from '@appium/base-plugin';
-import { find, elementEnabled } from './element';
+import { find, elementEnabled, setWait } from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
+  // this plugin supports a non-standard 'compare images' command
+  static newMethodMap = {
+    '/session/:sessionId/waitplugin/timeout': {
+      POST: {
+        command: 'setWait',
+        payloadParams: { required: ['data'] },
+        neverProxy: true,
+      },
+    },
+  };
+
+  async setWait(next, driver, ...args) {
+    await setWait(driver, args);
+  }
+
   async findElement(next, driver, ...args) {
     let commandLineArgs = this.cliArgs;
     await find(driver, args, commandLineArgs);
