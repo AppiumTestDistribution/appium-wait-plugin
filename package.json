@@ -35,7 +35,7 @@
     "@appium/base-plugin": "^1.9.2",
     "@appium/support": "^2.55.2",
     "async-wait-until": "^2.0.12",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.13.0",
