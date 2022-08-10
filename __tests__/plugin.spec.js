@@ -1,6 +1,7 @@
-import { main as startAppium } from 'appium';
 import { remote } from 'webdriverio';
 import { command } from 'webdriver';
+import { pluginE2EHarness } from 'appium/test';
+import path from 'path';
 var chai = require('chai'),
   // eslint-disable-next-line no-unused-vars
   should = chai.should();
@@ -8,29 +9,24 @@ let expect = chai.expect;
 import axios from 'axios';
 
 const APPIUM_HOST = 'localhost';
-const FAKE_ARGS = { sillyWebServerPort: 1234, host: 'hey' };
-const FAKE_PLUGIN_ARGS = { fake: FAKE_ARGS };
-let server;
-describe('Plugin Test', () => {
-  beforeEach('Start Server', async () => {
-    const port = '4723';
-    const baseArgs = {
-      port,
-      address: APPIUM_HOST,
-      usePlugins: ['element-wait'],
-    };
-    const args = { ...baseArgs, plugin: FAKE_PLUGIN_ARGS };
-    server = await startAppium(args);
-  });
-  it('Basic Plugin test', async () => {
-    const res = { fake: 'fakeResponse' };
-    (await axios.post('http://localhost:4723/fake')).data.should.eql(res);
-  });
+const FAKE_ARGS = { timeout: 2000, intervalBetweenAttempts: 1000 };
+const FAKE_PLUGIN_ARGS = { 'element-wait': FAKE_ARGS };
 
-  afterEach('Stop server', async () => {
-    if (server) await server.close();
-  });
-});
+const THIS_PLUGIN_DIR = path.join(__dirname, '..', '..');
+const APPIUM_HOME = path.join(THIS_PLUGIN_DIR, 'local_appium_home');
+const FAKE_DRIVER_DIR = '@appium/fake-driver';
+const TEST_HOST = 'localhost';
+const TEST_PORT = 4723;
+const TEST_FAKE_APP = path.join(
+  APPIUM_HOME,
+  'node_modules',
+  '@appium',
+  'fake-driver',
+  'test',
+  'fixtures',
+  'app.xml'
+);
+let server;
 
 describe('Set Timeout', () => {
   const WDIO_PARAMS = {
@@ -42,18 +38,25 @@ describe('Set Timeout', () => {
   const capabilities = {
     platformName: 'Fake',
     'appium:automationName': 'Fake',
-    'appium:app': require.resolve('../node_modules/@appium/fake-driver/test/fixtures/app.xml'),
+    'appium:app': TEST_FAKE_APP,
   };
   let driver;
+  pluginE2EHarness({
+    before,
+    after,
+    server,
+    serverArgs: { basePath: '/wd/hub', plugin: FAKE_PLUGIN_ARGS },
+    port: TEST_PORT,
+    host: TEST_HOST,
+    appiumHome: APPIUM_HOME,
+    driverName: 'fake',
+    driverSource: 'npm',
+    driverSpec: FAKE_DRIVER_DIR,
+    pluginName: 'element-wait',
+    pluginSource: 'local',
+    pluginSpec: '.',
+  });
   beforeEach(async () => {
-    const port = '4723';
-    const baseArgs = {
-      port,
-      address: APPIUM_HOST,
-      basePath: '/wd/hub',
-      usePlugins: ['element-wait'],
-    };
-    server = await startAppium(baseArgs);
     driver = await remote({ ...WDIO_PARAMS, capabilities });
 
     driver.addCommand(
@@ -84,13 +87,17 @@ describe('Set Timeout', () => {
     );
   });
   it('Should be able to set and get waitPlugin timeout', async () => {
+    console.log(await driver.getWaitTimeout());
     await driver.setWaitPluginTimeout({ timeout: 1111, intervalBetweenAttempts: 11 });
-    await driver.saveScreenshot('/Users/saikrisv/Documents/git/appium-wait-plugin/a.png');
     expect(await driver.getWaitTimeout()).to.deep.include({
       timeout: 1111,
       intervalBetweenAttempts: 11,
-      overrideTimeout: true,
     });
+  });
+
+  it('Basic Plugin test', async () => {
+    const res = { fake: 'fakeResponse' };
+    (await axios.post('http://localhost:4723/fake')).data.should.eql(res);
   });
 
   afterEach(async () => {

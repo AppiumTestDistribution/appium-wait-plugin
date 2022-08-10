@@ -5,7 +5,10 @@ import { waitUntil, TimeoutError } from 'async-wait-until';
 let map = new Map();
 
 export async function find(driver, args) {
-  const elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
+  let elementWaitProps;
+  if (driver.opts.plugin != undefined) {
+    elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
+  }
   const session = driver.sessionId;
   _setTimeout(elementWaitProps, session);
   let timeoutProp = _getTimeout(session);
@@ -118,17 +121,21 @@ function sessionInfo(driver, strategy, selector) {
   }
 }
 
-function _setTimeout(elementWaitProps, session, overrideTimeout = false) {
+function _setTimeout(
+  elementWaitProps = {
+    timeout: 10000,
+    intervalBetweenAttempts: 500,
+    overrideTimeout: false,
+  },
+  session,
+  overrideTimeout = false
+) {
   if (overrideTimeout && map.has(session)) {
     map.delete(session);
   }
   if (!map.has(session)) {
     log.info(`Timeout properties not set for session ${session}, trying to set one`);
-    let defaultTimeoutProp = {
-      timeout: 10000,
-      intervalBetweenAttempts: 500,
-      overrideTimeout,
-    };
+    let defaultTimeoutProp = elementWaitProps;
     if (
       elementWaitProps.timeout != undefined &&
       elementWaitProps.timeout !== defaultTimeoutProp.timeout
