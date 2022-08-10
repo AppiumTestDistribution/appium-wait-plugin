@@ -1,4 +1,5 @@
-import { remote, command } from 'webdriverio';
+import { remote } from 'webdriverio';
+import { command } from 'webdriver';
 
 const APPIUM_HOST = '127.0.0.1';
 const APPIUM_PORT = 31337;
@@ -20,10 +21,23 @@ let driver;
 describe('Plugin Test', () => {
   beforeEach(async () => {
     driver = await remote({ ...WDIO_PARAMS, capabilities });
+    driver.addCommand(
+      'setWaitPluginTimeout',
+      command('POST', '/session/:sessionId/waitplugin/timeout', {
+        command: 'setWaitPluginTimeout',
+        parameters: [
+          {
+            name: 'data',
+            type: 'object',
+            description: 'a valid parameter',
+            required: true,
+          },
+        ],
+      })
+    );
   });
 
   it('Vertical swipe test', async () => {
-    //await driver.setWaitPluginTimeout('data', { timeout: 1111, intervalBetweenAttempts: 11 });
     await driver.$('~username').click();
     await driver.$('~username').clearValue();
     await driver.$('~username').setValue('admin');
@@ -35,18 +49,3 @@ describe('Plugin Test', () => {
     await driver.deleteSession();
   });
 });
-
-// driver.addCommand(
-//   'setWaitPluginTimeout',
-//   command('POST', '/session/:sessionId/waitplugin/timeout', {
-//     command: 'setWaitPluginTimeout',
-//     parameters: [
-//       {
-//         name: 'data',
-//         type: 'object',
-//         description: 'a valid parameter',
-//         required: true,
-//       },
-//     ],
-//   })
-// );

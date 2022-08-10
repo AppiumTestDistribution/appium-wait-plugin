@@ -1,11 +1,10 @@
-import BasePlugin from '@appium/base-plugin';
-import { find, elementEnabled, setWait } from './element';
+import { BasePlugin } from 'appium/plugin';
+import { find, elementEnabled, setWait, _getTimeout } from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
-  constructor(name) {
-    super(name);
+  constructor(name, cliArgs = {}) {
+    super(name, cliArgs);
     this.name = name;
-    console.log('CLI Args', this.cliArgs);
   }
   // this plugin supports a non-standard 'compare images' command
   static newMethodMap = {
@@ -16,10 +15,20 @@ export default class WaitCommandPlugin extends BasePlugin {
         neverProxy: true,
       },
     },
+    '/session/:sessionId/waitplugin/getTimeout': {
+      GET: {
+        command: 'getWaitTimeout',
+        neverProxy: true,
+      },
+    },
   };
 
   async setWait(next, driver, ...args) {
     await setWait(driver, args);
+  }
+
+  async getWaitTimeout(next, driver, ...args) {
+    return await _getTimeout(driver.sessionId);
   }
 
   async findElement(next, driver, ...args) {

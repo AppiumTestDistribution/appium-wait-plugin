@@ -150,6 +150,6 @@ function _setTimeout(elementWaitProps, session, overrideTimeout = false) {
   );
 }
 
-function _getTimeout(session) {
+export function _getTimeout(session) {
   return map.get(session);
 }
