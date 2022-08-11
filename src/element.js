@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import log from './logger';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 
@@ -16,10 +15,9 @@ export async function find(driver, args) {
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
   const predicate = async () => {
-    const ele = await elementState(driver, strategy, selector);
-    if (ele.value.error == undefined) {
-      return ele;
-    } else {
+    try {
+      return await driver.findElement(strategy, selector);
+    } catch (e) {
       log.info(`Waiting to find element with ${strategy} strategy for ${selector} selector`);
       return false;
     }
@@ -77,48 +75,6 @@ export async function elementEnabled(driver, el) {
 async function elementIsDisplayed(driver, element) {
   log.info('Check if element is displayed');
   return await driver.elementDisplayed(element);
-}
-
-async function elementState(driver, strategy, selector) {
-  const sessionDetails = sessionInfo(driver, strategy, selector);
-  const response = await fetch(
-    `${sessionDetails.baseUrl}session/${sessionDetails.jwProxySession}/element`,
-    {
-      body: sessionDetails.body,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
-  return await response.json();
-}
-
-function _getAutomationName(driver) {
-  return driver.caps.automationName;
-}
-
-function sessionInfo(driver, strategy, selector) {
-  const automationName = _getAutomationName(driver);
-  if (automationName === 'XCuiTest') {
-    return {
-      baseUrl: `http://${driver.wda.webDriverAgentUrl}`,
-      jwProxySession: driver.wda.jwproxy.sessionId,
-      body: JSON.stringify({
-        using: strategy,
-        value: selector,
-      }),
-    };
-  } else {
-    return {
-      baseUrl: `http://${driver.uiautomator2.host}:${driver.uiautomator2.systemPort}/`,
-      jwProxySession: driver.uiautomator2.jwproxy.sessionId,
-      body: JSON.stringify({
-        strategy,
-        selector,
-        context: '',
-        multiple: false,
-      }),
-    };
-  }
 }
 
 function _setTimeout(
