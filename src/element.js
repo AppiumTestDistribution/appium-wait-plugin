@@ -24,9 +24,9 @@ export async function find(driver, args) {
   };
   try {
     const element = await waitUntil(predicate, timeoutProp);
-    if (element.value.ELEMENT) {
+    if (element.ELEMENT) {
       log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
-      let elementViewState = await elementIsDisplayed(driver, element.value.ELEMENT);
+      let elementViewState = await elementIsDisplayed(driver, element.ELEMENT);
       if (elementViewState) log.info('Element is displayed!');
       if (!elementViewState)
         throw new Error(
