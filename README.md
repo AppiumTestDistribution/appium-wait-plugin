@@ -67,6 +67,45 @@ driver.findElementByAccessibilityId("login").click();
 driver.findElementByAccessibilityId("slider1").click();
 driver.findElementByAccessibilityId("login").sendKeys('Hello');
 ```
+## Configure Wait timeout in test
+
+WDIO Example
+
+```
+ driver.addCommand(
+        'setWaitPluginTimeout',
+        command('POST', '/session/:sessionId/waitplugin/timeout', {
+          command: 'setWaitPluginTimeout',
+          parameters: [
+            {
+              name: 'data',
+              type: 'object',
+              description: 'a valid parameter',
+              required: true,
+            },
+          ],
+        })
+      );
+
+driver.addCommand(
+     'getWaitTimeout',
+        command('GET', '/session/:sessionId/waitplugin/getTimeout', {
+          command: 'getWaitTimeout',
+          parameters: [],
+          returns: {
+            type: 'object',
+            name: 'activity',
+            description: 'Name of the current activity',
+          },
+        })
+      );
+```
+
+Usage 
+
+```
+await driver.setWaitPluginTimeout({ timeout: 1111, intervalBetweenAttempts: 11 });
+```
 
 Server logs will be as below:
 
