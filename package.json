@@ -1,12 +1,13 @@
 {
   "name": "appium-wait-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An appium 2.0 plugin that waits for element to be found",
   "main": "./lib/index.js",
   "scripts": {
     "test": "mocha --require ts-node/register __tests__/plugin.spec.js --timeout 60000",
     "test-e2e": "mocha --require ts-node/register -p __tests__/e2e.spec.js --timeout 60000",
     "build": "npx tsc",
+    "prepublish": "npx tsc",
     "prettier": "prettier src --write --single-quote",
     "uninstall": "(appium plugin uninstall element-wait || exit 0)",
     "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
