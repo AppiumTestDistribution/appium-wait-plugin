@@ -5,7 +5,7 @@ let map = new Map();
 
 export async function find(driver, args) {
   let elementWaitProps;
-  if (driver.opts.plugin != undefined) {
+  if (driver.opts.plugin != undefined && driver.opts.plugin['element-wait'] != undefined) {
     elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
   }
   const session = driver.sessionId;
