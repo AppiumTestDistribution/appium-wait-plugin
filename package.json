@@ -1,6 +1,6 @@
 {
   "name": "appium-wait-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An appium 2.0 plugin that waits for element to be found",
   "main": "./lib/index.js",
   "scripts": {
