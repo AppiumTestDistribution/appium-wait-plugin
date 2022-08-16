@@ -94,8 +94,8 @@ driver.addCommand(
           parameters: [],
           returns: {
             type: 'object',
-            name: 'activity',
-            description: 'Name of the current activity',
+            name: 'timeout',
+            description: 'Get timeout set',
           },
         })
       );
