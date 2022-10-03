@@ -1,4 +1,4 @@
-import { BasePlugin } from 'appium/plugin';
+import BasePlugin from '@appium/base-plugin';
 import { find, elementEnabled, setWait, _getTimeout } from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
