@@ -33,7 +33,9 @@
   },
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
-    "async-wait-until": "^2.0.12"
+    "async-wait-until": "^2.0.12",
+    "node-fetch": "^2.6.1",
+    "ora": "5.4.1"
   },
   "devDependencies": {
     "@appium/fake-driver": "^4.1.0",
