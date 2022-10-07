@@ -38,7 +38,8 @@
     "ora": "5.4.1"
   },
   "devDependencies": {
-    "@appium/fake-driver": "^4.1.0",
+    "@appium/fake-driver": "^4.2.1",
+    "@appium/plugin-test-support": "0.2.0",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@types/chai": "^4.2.16",
     "@types/lodash": "^4.14.170",

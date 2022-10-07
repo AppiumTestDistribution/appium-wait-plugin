@@ -1,18 +1,13 @@
 import log from './logger';
-import { waitUntil } from 'async-wait-until';
+import { waitUntil, TimeoutError } from 'async-wait-until';
 import ora from 'ora';
 
 let map = new Map();
 
 export async function find(driver, args) {
   let elementWaitProps;
-  if (
-    driver.opts.plugin != undefined &&
-    driver.opts.plugin['element-wait'] != undefined
-  ) {
-    elementWaitProps = JSON.parse(
-      JSON.stringify(driver.opts.plugin['element-wait'])
-    );
+  if (driver.opts.plugin != undefined && driver.opts.plugin['element-wait'] != undefined) {
+    elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
   }
   const session = driver.sessionId;
   _setTimeout(elementWaitProps, session);
@@ -21,7 +16,7 @@ export async function find(driver, args) {
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
   const predicate = async () => {
-    const ele = await elementState(driver, strategy, selector);
+    const ele = await elementIsDisplayed(driver, strategy, selector);
     if (ele.value.error == undefined) {
       return ele;
     } else {
@@ -34,9 +29,7 @@ export async function find(driver, args) {
   try {
     const element = await waitUntil(predicate, timeoutProp);
     if (element.ELEMENT) {
-      log.info(
-        `Element with ${strategy} strategy for ${selector} selector found.`
-      );
+      log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
       let elementViewState = await elementIsDisplayed(driver, element.ELEMENT);
       if (elementViewState) log.info('Element is displayed!');
       spinner.succeed();
@@ -48,9 +41,7 @@ export async function find(driver, args) {
     }
   } catch (e) {
     spinner.fail();
-    throw new Error(
-      `Time out after waiting for element ${selector} for ${defaultConfig.timeout}`
-    );
+    throw new Error(`Time out after waiting for element ${selector} for ${timeoutProp.timeout}`);
   }
 }
 
@@ -101,9 +92,7 @@ function _setTimeout(
     map.delete(session);
   }
   if (!map.has(session)) {
-    log.info(
-      `Timeout properties not set for session ${session}, trying to set one`
-    );
+    log.info(`Timeout properties not set for session ${session}, trying to set one`);
     let defaultTimeoutProp = elementWaitProps;
     if (
       elementWaitProps.timeout != undefined &&
@@ -114,21 +103,15 @@ function _setTimeout(
     }
     if (
       elementWaitProps.intervalBetweenAttempts != undefined &&
-      elementWaitProps.intervalBetweenAttempts !==
-        defaultTimeoutProp.intervalBetweenAttempts
+      elementWaitProps.intervalBetweenAttempts !== defaultTimeoutProp.intervalBetweenAttempts
     ) {
-      defaultTimeoutProp.intervalBetweenAttempts =
-        elementWaitProps.intervalBetweenAttempts;
-      log.info(
-        `Internal between attempts is set to ${defaultTimeoutProp.intervalBetweenAttempts}`
-      );
+      defaultTimeoutProp.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
+      log.info(`Internal between attempts is set to ${defaultTimeoutProp.intervalBetweenAttempts}`);
     }
     map.set(session, defaultTimeoutProp);
   }
   log.info(
-    `Timeout properties set for session ${session} is ${JSON.stringify(
-      _getTimeout(session)
-    )} ms`
+    `Timeout properties set for session ${session} is ${JSON.stringify(_getTimeout(session))} ms`
   );
 }
 
