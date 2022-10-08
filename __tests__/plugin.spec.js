@@ -1,10 +1,13 @@
 import { remote } from 'webdriverio';
 import { command } from 'webdriver';
-import { pluginE2EHarness } from 'appium/test';
+import { pluginE2EHarness } from '@appium/plugin-test-support';
 import path from 'path';
 var chai = require('chai'),
-  // eslint-disable-next-line no-unused-vars
-  should = chai.should();
+  chaiAsPromised = require('chai-as-promised');
+
+chai.use(chaiAsPromised);
+// eslint-disable-next-line no-undef
+should = chai.should();
 let expect = chai.expect;
 import axios from 'axios';
 
