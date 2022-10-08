@@ -1,5 +1,6 @@
 import log from './logger';
 import { waitUntil, TimeoutError } from 'async-wait-until';
+import ora from 'ora';
 
 let map = new Map();
 
@@ -18,11 +19,14 @@ export async function find(driver, args) {
     try {
       return await driver.findElement(strategy, selector);
     } catch (e) {
-      log.info(`Waiting to find element with ${strategy} strategy for ${selector} selector`);
       return false;
     }
   };
+  let spinner;
   try {
+    spinner = ora(
+      `Waiting to find element with ${strategy} strategy for ${selector} selector`
+    ).start();
     const element = await waitUntil(predicate, timeoutProp);
     if (element.ELEMENT) {
       log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
@@ -32,9 +36,11 @@ export async function find(driver, args) {
         throw new Error(
           'Element was not displayed! Please make sure the element is in viewport to perform the action'
         );
+      spinner.succeed();
     }
   } catch (e) {
     if (e instanceof TimeoutError) {
+      spinner.fail();
       throw new Error(
         `Time out after waiting for element ${selector} for ${timeoutProp.timeout} ms`
       );
