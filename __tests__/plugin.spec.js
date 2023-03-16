@@ -90,7 +90,7 @@ describe('Set Timeout', () => {
       );
     });
     it('Should be able to set and get waitPlugin timeout', async () => {
-      await driver.$('#AlertButton');
+      await driver.$('id=AlertButton');
       expect(await driver.getWaitTimeout()).to.deep.include(FAKE_ARGS);
       await driver.setWaitPluginTimeout({ timeout: 1111, intervalBetweenAttempts: 11 });
       expect(await driver.getWaitTimeout()).to.deep.include({

@@ -1,12 +1,13 @@
 import log from './logger';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 import ora from 'ora';
+import { errors } from 'appium/driver';
 
 let map = new Map();
 
 export async function find(driver, args) {
   let elementWaitProps;
-  if (driver.opts.plugin != undefined && driver.opts.plugin['element-wait'] != undefined) {
+  if (driver.opts.plugin !== undefined && driver.opts.plugin['element-wait'] !== undefined) {
     elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
   }
   const session = driver.sessionId;
@@ -15,11 +16,26 @@ export async function find(driver, args) {
   const locatorArgs = JSON.parse(JSON.stringify(args));
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
+  const sessionInformation = sessionInfo(driver);
   const predicate = async () => {
-    try {
-      return await driver.findElement(strategy, selector);
-    } catch (e) {
-      return false;
+    if (_getAutomationName(driver) === 'Fake') {
+      try {
+        const element = await driver.findElement(strategy, selector);
+        return {
+          value: {
+            ELEMENT: element.ELEMENT,
+          },
+        };
+      } catch (e) {
+        return false;
+      }
+    } else {
+      const ele = await elementState(sessionInformation, strategy, selector);
+      if (ele.value.error === undefined) {
+        return ele;
+      } else {
+        return false;
+      }
     }
   };
   let spinner;
@@ -28,26 +44,28 @@ export async function find(driver, args) {
       `Waiting to find element with ${strategy} strategy for ${selector} selector`
     ).start();
     const element = await waitUntil(predicate, timeoutProp);
-    if (element.ELEMENT) {
-      log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
-      let elementViewState = await elementIsDisplayed(driver, element.ELEMENT);
-      if (elementViewState) log.info('Element is displayed!');
-      if (!elementViewState)
-        throw new Error(
-          'Element was not displayed! Please make sure the element is in viewport to perform the action'
-        );
-      spinner.succeed();
-    }
+    log.info(`Element with ${strategy} strategy for ${selector} selector found.`);
+    let elementViewState = await elementIsDisplayed(driver, element.value.ELEMENT);
+    if (elementViewState) log.info('Element is displayed!');
+    if (!elementViewState)
+      throw new errors.ElementNotVisibleError(
+        'Element was not displayed! Please make sure the element is in viewport to perform the action'
+      );
+    spinner.succeed();
   } catch (e) {
     if (e instanceof TimeoutError) {
       spinner.fail();
-      throw new Error(
+      throw new errors.NoSuchElementError(
         `Time out after waiting for element ${selector} for ${timeoutProp.timeout} ms`
       );
     } else {
       console.error(e);
     }
   }
+}
+
+export function _getTimeout(session) {
+  return map.get(session);
 }
 
 export async function setWait(driver, args) {
@@ -83,6 +101,44 @@ async function elementIsDisplayed(driver, element) {
   return await driver.elementDisplayed(element);
 }
 
+function _getAutomationName(driver) {
+  return driver.caps.automationName;
+}
+
+function sessionInfo(driver) {
+  console.log('Session INfor', driver.caps.automationName);
+  if (driver.caps.automationName === 'Fake') return;
+  const automationName = _getAutomationName(driver);
+  if (automationName === 'XCuiTest') {
+    return {
+      baseUrl: `${driver.wda.wdaBaseUrl}:${driver.wda.wdaLocalPort}/`,
+      jwProxySession: driver.wda.jwproxy.sessionId,
+    };
+  } else {
+    return {
+      baseUrl: `http://${driver.uiautomator2.jwproxy.server}:${driver.uiautomator2.jwproxy.port}/`,
+      jwProxySession: driver.uiautomator2.jwproxy.sessionId,
+    };
+  }
+}
+
+async function elementState(sessionInfo, strategy, selector) {
+  const response = await fetch(
+    `${sessionInfo.baseUrl}session/${sessionInfo.jwProxySession}/element`,
+    {
+      body: JSON.stringify({
+        strategy,
+        selector,
+        context: '',
+        multiple: false,
+      }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+  return await response.json();
+}
+
 function _setTimeout(
   elementWaitProps = {
     timeout: 10000,
@@ -99,14 +155,14 @@ function _setTimeout(
     log.info(`Timeout properties not set for session ${session}, trying to set one`);
     let defaultTimeoutProp = elementWaitProps;
     if (
-      elementWaitProps.timeout != undefined &&
+      elementWaitProps.timeout !== undefined &&
       elementWaitProps.timeout !== defaultTimeoutProp.timeout
     ) {
       defaultTimeoutProp.timeout = elementWaitProps.timeout;
       log.info(`Timeout is set to ${defaultTimeoutProp.timeout}`);
     }
     if (
-      elementWaitProps.intervalBetweenAttempts != undefined &&
+      elementWaitProps.intervalBetweenAttempts !== undefined &&
       elementWaitProps.intervalBetweenAttempts !== defaultTimeoutProp.intervalBetweenAttempts
     ) {
       defaultTimeoutProp.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
@@ -117,8 +173,4 @@ function _setTimeout(
   log.info(
     `Timeout properties set for session ${session} is ${JSON.stringify(_getTimeout(session))} ms`
   );
-}
-
-export function _getTimeout(session) {
-  return map.get(session);
 }
