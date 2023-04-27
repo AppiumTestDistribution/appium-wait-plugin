@@ -28,7 +28,6 @@ export default class WaitCommandPlugin extends BasePlugin {
       command: 'getWaitTimeout',
     },
 
-    // this is a totally new execute method
     'plugin: setWaitTimeout': {
       command: 'setWait',
       params: { required: ['timeout', 'intervalBetweenAttempts'] },
