@@ -69,7 +69,7 @@ export function _getTimeout(session) {
 }
 
 export async function setWait(driver, args) {
-  _setTimeout(args[0], driver.sessionId, true);
+  _setTimeout(args, driver.sessionId, true);
 }
 
 export async function elementEnabled(driver, el) {
@@ -106,7 +106,6 @@ function _getAutomationName(driver) {
 }
 
 function sessionInfo(driver) {
-  console.log('Session INfor', driver.caps.automationName);
   if (driver.caps.automationName === 'Fake') return;
   const automationName = _getAutomationName(driver);
   if (automationName === 'XCUITest') {
