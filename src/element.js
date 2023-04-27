@@ -109,9 +109,9 @@ function sessionInfo(driver) {
   console.log('Session INfor', driver.caps.automationName);
   if (driver.caps.automationName === 'Fake') return;
   const automationName = _getAutomationName(driver);
-  if (automationName === 'XCuiTest') {
+  if (automationName === 'XCUITest') {
     return {
-      baseUrl: `${driver.wda.wdaBaseUrl}:${driver.wda.wdaLocalPort}/`,
+      baseUrl: `${driver.wda.webDriverAgentUrl}`,
       jwProxySession: driver.wda.jwproxy.sessionId,
     };
   } else {
@@ -127,10 +127,8 @@ async function elementState(sessionInfo, strategy, selector) {
     `${sessionInfo.baseUrl}session/${sessionInfo.jwProxySession}/element`,
     {
       body: JSON.stringify({
-        strategy,
-        selector,
-        context: '',
-        multiple: false,
+        using: strategy,
+        value: selector,
       }),
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
