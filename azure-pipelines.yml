@@ -1,21 +1,51 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
-- main
+  - main
 
-pool:
-  vmImage: macOS-latest
+jobs:
+  - job: UnitTest
+    pool:
+      vmImage: 'macOS-latest'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '16.x'
-  displayName: 'Install Node.js'
+    steps:
+      - task: NodeTool@0.200.0
+        inputs:
+          versionSpec: '16.x'
 
-- script: |
-    npm ci
-    npm test
-  displayName: 'npm install and test'
+      - script: |
+          npm ci
+          npm test
+        displayName: 'npm test'
+
+  - job: ANDROID
+    pool:
+      vmImage: 'macOS-latest'
+
+    steps:
+      - task: NodeTool@0.200.0
+        inputs:
+          versionSpec: '16.x'
+
+      - script: |
+          npm ci
+        displayName: 'npm install'
+
+      - bash: |
+          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
+        displayName: "install Android image"
+      - script: |
+          $ANDROID_HOME/emulator/emulator -list-avds
+          echo '---'
+          echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
+          echo '---'
+          $ANDROID_HOME/emulator/emulator -list-avds
+        displayName: "create AVD"
+      - script: |
+          $ANDROID_HOME/platform-tools/adb devices
+          echo '---'
+          nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+          echo '---'
+          $ANDROID_HOME/platform-tools/adb devices
+        displayName: "start Android emulator"
+      - script: |
+          npm run test-e2e
+        displayName: "Android Integration Test"
