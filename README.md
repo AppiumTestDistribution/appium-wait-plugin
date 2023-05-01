@@ -69,42 +69,23 @@ driver.findElementByAccessibilityId("login").sendKeys('Hello');
 ```
 ## Configure Wait timeout in test
 
-WDIO Example
+WDIO Example 
 
 ```
- driver.addCommand(
-        'setWaitPluginTimeout',
-        command('POST', '/session/:sessionId/waitplugin/timeout', {
-          command: 'setWaitPluginTimeout',
-          parameters: [
-            {
-              name: 'data',
-              type: 'object',
-              description: 'a valid parameter',
-              required: true,
-            },
-          ],
-        })
-      );
+await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          timeout: 1111,
+          intervalBetweenAttempts: 11,
+        },
+]);
 
-driver.addCommand(
-     'getWaitTimeout',
-        command('GET', '/session/:sessionId/waitplugin/getTimeout', {
-          command: 'getWaitTimeout',
-          parameters: [],
-          returns: {
-            type: 'object',
-            name: 'timeout',
-            description: 'Get timeout set',
-          },
-        })
-      );
+await driver.executeScript('plugin: getWaitTimeout', [])
 ```
 
-Usage 
+Java Example 
 
 ```
-await driver.setWaitPluginTimeout({ timeout: 1111, intervalBetweenAttempts: 11 });
+driver.executeScript("plugin: setWaitTimeout", ImmutableMap.of("timeout", 1111 , "intervalBetweenAttempts", 11 ));
 ```
 
 Server logs will be as below:

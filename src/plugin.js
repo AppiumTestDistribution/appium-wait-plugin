@@ -23,11 +23,26 @@ export default class WaitCommandPlugin extends BasePlugin {
     },
   };
 
-  async setWait(next, driver, ...args) {
-    await setWait(driver, args);
+  static executeMethodMap = /** @type {const} */ ({
+    'plugin: getWaitTimeout': {
+      command: 'getWaitTimeout',
+    },
+
+    'plugin: setWaitTimeout': {
+      command: 'setWait',
+      params: { required: ['timeout', 'intervalBetweenAttempts'] },
+    },
+  });
+
+  async execute(next, driver, script, args) {
+    return await this.executeMethod(next, driver, script, args);
   }
 
-  async getWaitTimeout(next, driver, ...args) {
+  async setWait(next, driver, timeout, intervalBetweenAttempts) {
+    await setWait(driver, { timeout, intervalBetweenAttempts });
+  }
+
+  async getWaitTimeout(next, driver) {
     return await _getTimeout(driver.sessionId);
   }
 

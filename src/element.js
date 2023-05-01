@@ -30,7 +30,7 @@ export async function find(driver, args) {
         return false;
       }
     } else {
-      const ele = await elementState(sessionInformation, strategy, selector);
+      const ele = await elementState(sessionInformation, strategy, selector, driver);
       if (ele.value.error === undefined) {
         return ele;
       } else {
@@ -69,7 +69,7 @@ export function _getTimeout(session) {
 }
 
 export async function setWait(driver, args) {
-  _setTimeout(args[0], driver.sessionId, true);
+  _setTimeout(args, driver.sessionId, true);
 }
 
 export async function elementEnabled(driver, el) {
@@ -106,7 +106,6 @@ function _getAutomationName(driver) {
 }
 
 function sessionInfo(driver) {
-  console.log('Session INfor', driver.caps.automationName);
   if (driver.caps.automationName === 'Fake') return;
   const automationName = _getAutomationName(driver);
   if (automationName === 'XCUITest') {
@@ -122,14 +121,25 @@ function sessionInfo(driver) {
   }
 }
 
-async function elementState(sessionInfo, strategy, selector) {
+async function elementState(sessionInfo, strategy, selector, driver) {
+  let automationName = _getAutomationName(driver);
+  if (automationName === 'XCUITest') {
+    this.body = JSON.stringify({
+      using: strategy,
+      value: selector,
+    });
+  } else {
+    this.body = JSON.stringify({
+      strategy,
+      selector,
+      context: '',
+      multiple: false,
+    });
+  }
   const response = await fetch(
     `${sessionInfo.baseUrl}session/${sessionInfo.jwProxySession}/element`,
     {
-      body: JSON.stringify({
-        using: strategy,
-        value: selector,
-      }),
+      body: this.body,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     }

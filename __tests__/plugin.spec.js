@@ -1,5 +1,4 @@
 import { remote } from 'webdriverio';
-import { command } from 'webdriver';
 import { pluginE2EHarness } from '@appium/plugin-test-support';
 import path from 'path';
 var chai = require('chai'),
@@ -61,39 +60,17 @@ describe('Set Timeout', () => {
     });
     beforeEach(async () => {
       driver = await remote({ ...WDIO_PARAMS, capabilities });
-
-      driver.addCommand(
-        'setWaitPluginTimeout',
-        command('POST', '/session/:sessionId/waitplugin/timeout', {
-          command: 'setWaitPluginTimeout',
-          parameters: [
-            {
-              name: 'data',
-              type: 'object',
-              description: 'a valid parameter',
-              required: true,
-            },
-          ],
-        })
-      );
-      driver.addCommand(
-        'getWaitTimeout',
-        command('GET', '/session/:sessionId/waitplugin/getTimeout', {
-          command: 'getWaitTimeout',
-          parameters: [],
-          returns: {
-            type: 'object',
-            name: 'activity',
-            description: 'Name of the current activity',
-          },
-        })
-      );
     });
     it('Should be able to set and get waitPlugin timeout', async () => {
       await driver.$('id=AlertButton');
-      expect(await driver.getWaitTimeout()).to.deep.include(FAKE_ARGS);
-      await driver.setWaitPluginTimeout({ timeout: 1111, intervalBetweenAttempts: 11 });
-      expect(await driver.getWaitTimeout()).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          timeout: 1111,
+          intervalBetweenAttempts: 11,
+        },
+      ]);
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
       });
@@ -129,42 +106,21 @@ describe('Set Timeout', () => {
     });
     beforeEach(async () => {
       driver = await remote({ ...WDIO_PARAMS, capabilities });
-
-      driver.addCommand(
-        'setWaitPluginTimeout',
-        command('POST', '/session/:sessionId/waitplugin/timeout', {
-          command: 'setWaitPluginTimeout',
-          parameters: [
-            {
-              name: 'data',
-              type: 'object',
-              description: 'a valid parameter',
-              required: true,
-            },
-          ],
-        })
-      );
-      driver.addCommand(
-        'getWaitTimeout',
-        command('GET', '/session/:sessionId/waitplugin/getTimeout', {
-          command: 'getWaitTimeout',
-          parameters: [],
-          returns: {
-            type: 'object',
-            name: 'activity',
-            description: 'Name of the current activity',
-          },
-        })
-      );
     });
+
     it('Should be able to set and get waitPlugin timeout', async () => {
       await driver.$('#AlertButton');
-      expect(await driver.getWaitTimeout()).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
         timeout: 10000,
         intervalBetweenAttempts: 500,
       });
-      await driver.setWaitPluginTimeout({ timeout: 1111, intervalBetweenAttempts: 11 });
-      expect(await driver.getWaitTimeout()).to.deep.include({
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          timeout: 1111,
+          intervalBetweenAttempts: 11,
+        },
+      ]);
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
       });
