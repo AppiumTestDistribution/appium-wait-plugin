@@ -38,7 +38,8 @@ const androidCaps = {
 const iOSCaps = {
   platformName: 'iOS',
   'appium:automationName': 'XCUITest',
-  'appium:enforceFreshSimulatorCreation': true,
+  'appium:deviceName': 'iPhone 14 Pro',
+  'appium:platformVersion': '16.2',
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/vodqa.zip?raw=true',
 };
