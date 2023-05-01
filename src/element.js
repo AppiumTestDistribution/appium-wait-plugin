@@ -30,7 +30,7 @@ export async function find(driver, args) {
         return false;
       }
     } else {
-      const ele = await elementState(sessionInformation, strategy, selector);
+      const ele = await elementState(sessionInformation, strategy, selector, driver);
       if (ele.value.error === undefined) {
         return ele;
       } else {
@@ -121,14 +121,25 @@ function sessionInfo(driver) {
   }
 }
 
-async function elementState(sessionInfo, strategy, selector) {
+async function elementState(sessionInfo, strategy, selector, driver) {
+  let automationName = _getAutomationName(driver);
+  if (automationName === 'XCUITest') {
+    this.body = JSON.stringify({
+      using: strategy,
+      value: selector,
+    });
+  } else {
+    this.body = JSON.stringify({
+      strategy,
+      selector,
+      context: '',
+      multiple: false,
+    });
+  }
   const response = await fetch(
     `${sessionInfo.baseUrl}session/${sessionInfo.jwProxySession}/element`,
     {
-      body: JSON.stringify({
-        using: strategy,
-        value: selector,
-      }),
+      body: this.body,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     }
