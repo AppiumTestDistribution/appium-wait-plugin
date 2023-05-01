@@ -63,5 +63,6 @@ jobs:
         displayName: 'npm install'
 
       - script: |
+          xcrun simctl list
           ENV='ios' npm run test-e2e
         displayName: "iOS Integration Test"
