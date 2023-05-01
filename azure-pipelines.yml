@@ -47,5 +47,21 @@ jobs:
           $ANDROID_HOME/platform-tools/adb devices
         displayName: "start Android emulator"
       - script: |
-          npm run test-e2e
+          ENV='android' npm run test-e2e
         displayName: "Android Integration Test"
+  - job: iOS
+    pool:
+      vmImage: 'macOS-latest'
+
+    steps:
+      - task: NodeTool@0.200.0
+        inputs:
+          versionSpec: '16.x'
+
+      - script: |
+          npm ci
+        displayName: 'npm install'
+
+      - script: |
+          ENV='ios' npm run test-e2e
+        displayName: "iOS Integration Test"
