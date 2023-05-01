@@ -28,6 +28,7 @@ const WDIO_PARAMS = {
 };
 const capabilities = {
   platformName: 'Android',
+  'appium:uiautomator2ServerInstallTimeout': '120000',
   'appium:automationName': 'UIAutomator2',
   'appium:app':
     'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
