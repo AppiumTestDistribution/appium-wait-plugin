@@ -22,7 +22,7 @@ const TEST_PORT = 4723;
 
 let server;
 const WDIO_PARAMS = {
-  connectionRetryCount: 0,
+  connectionRetryCount: 220000,
   hostname: APPIUM_HOST,
   port: 4723,
   path: '/wd/hub',
