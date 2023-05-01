@@ -54,6 +54,7 @@ describe('Set Timeout', () => {
       appiumHome: APPIUM_HOME,
       driverName: 'fake',
       driverSource: 'npm',
+      driverSpec: FAKE_DRIVER_DIR,
       pluginName: 'element-wait',
       pluginSource: 'local',
       pluginSpec: '.',
