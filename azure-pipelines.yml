@@ -41,7 +41,7 @@ jobs:
   - job: iOS_E2E_Tests
     #  timeoutInMinutes: '90'
     steps:
-      - template: .azure-template/bootstrap_steps.yml
+      - template: .azure-template/bootstrap.yml
       - script: |
           sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer
           xcrun simctl list
