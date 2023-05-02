@@ -35,9 +35,10 @@ jobs:
           $ANDROID_HOME/platform-tools/adb devices -l
           echo "Emulator started"
         displayName: Emulator configuration
-      - script: $NVM_DIR/versions/node/$(node --version)/bin/appium driver install uiautomator2
-        displayName: Install UIAutomator2 driver
       - script: |
+          npm ci
+          $NVM_DIR/versions/node/$(node --version)/appium plugin install --source=local .
+          nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
           PLATFORM=android npm run test-e2e
         displayName: Android E2E Test
   - job: iOS_E2E_Tests
@@ -56,5 +57,8 @@ jobs:
       - script: $NVM_DIR/versions/node/$(node --version)/bin/appium driver run xcuitest build-wda
         displayName: Prebuild XCUITest driver
       - script: |
+          npm ci
+          $NVM_DIR/versions/node/$(node --version)/appium plugin install --source=local .
+          nohup ./node_modules/.bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
           PLATFORM=ios npm run test-e2e
         displayName: iOS E2E Test
