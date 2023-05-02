@@ -1,6 +1,5 @@
 import { remote } from 'webdriverio';
-import { pluginE2EHarness } from '@appium/plugin-test-support';
-import path, { resolve } from 'path';
+import { resolve } from 'path';
 var chai = require('chai'),
   chaiAsPromised = require('chai-as-promised');
 
@@ -11,16 +10,7 @@ let expect = chai.expect;
 
 const APPIUM_HOST = 'localhost';
 const FAKE_ARGS = { timeout: 10000, intervalBetweenAttempts: 1000 };
-const FAKE_PLUGIN_ARGS = { 'element-wait': FAKE_ARGS };
 
-const THIS_PLUGIN_DIR = path.join(__dirname, '..', '..');
-const APPIUM_HOME = path.join(THIS_PLUGIN_DIR, 'local_appium_home');
-const FAKE_DRIVER_DIR =
-  process.env.PLATFORM === 'android' ? 'appium-uiautomator2-driver' : 'appium-xcuitest-driver';
-const TEST_HOST = 'localhost';
-const TEST_PORT = 4723;
-
-let server;
 const androidApp = resolve('./build/VodQA.apk');
 const iosApp = resolve('./build/vodqa.zip');
 
@@ -40,7 +30,7 @@ const androidCaps = {
 const iOSCaps = {
   platformName: 'iOS',
   'appium:automationName': 'XCUITest',
-  'appium:deviceName': 'iPhone 14 Pro',
+  'appium:deviceName': 'iPhone 12',
   'appium:platformVersion': '16.2',
   'appium:app': iosApp,
 };
@@ -48,21 +38,6 @@ const iOSCaps = {
 describe('Set Timeout', () => {
   describe('with CLI args', () => {
     let driver;
-    pluginE2EHarness({
-      before,
-      after,
-      server,
-      serverArgs: { basePath: '/wd/hub', plugin: FAKE_PLUGIN_ARGS },
-      port: TEST_PORT,
-      host: TEST_HOST,
-      appiumHome: APPIUM_HOME,
-      driverName: process.env.PLATFORM === 'android' ? 'uiautomator2' : 'xcuitest',
-      driverSource: 'npm',
-      driverSpec: FAKE_DRIVER_DIR,
-      pluginName: 'element-wait',
-      pluginSource: 'local',
-      pluginSpec: '.',
-    });
     beforeEach(async () => {
       driver = await remote({
         ...WDIO_PARAMS,
@@ -86,7 +61,6 @@ describe('Set Timeout', () => {
 
     afterEach(async () => {
       await driver.deleteSession();
-      if (server) await server.close();
     });
   });
 });

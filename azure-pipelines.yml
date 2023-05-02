@@ -35,6 +35,8 @@ jobs:
           $ANDROID_HOME/platform-tools/adb devices -l
           echo "Emulator started"
         displayName: Emulator configuration
+      - script: $NVM_DIR/versions/node/$(node --version)/bin/appium driver install uiautomator2
+        displayName: Install UIAutomator2 driver
       - script: |
           PLATFORM=android npm run test-e2e
         displayName: Android E2E Test
