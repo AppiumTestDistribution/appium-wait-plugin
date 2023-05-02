@@ -1,68 +1,57 @@
-trigger:
-  - main
+# Gradle
+# Build your Java project and run tests with Gradle using a Gradle wrapper script.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+pool:
+  vmImage: 'macos-12'
+
+variables:
+  ANDROID_EMU_NAME: test
+  ANDROID_EMU_ABI: x86
+  ANDROID_EMU_TARGET: android-28
+  ANDROID_EMU_TAG: default
+  XCODE_VERSION: 14.2
+  IOS_PLATFORM_VERSION: 16.2
+  IOS_DEVICE_NAME: iPhone 12
+  NODE_VERSION: 18.x
+  JDK_VERSION: 1.8
 
 jobs:
-  - job: UnitTest
-    pool:
-      vmImage: 'macOS-latest'
-
+  - job: Android_E2E_Tests
     steps:
-      - task: NodeTool@0.200.0
-        inputs:
-          versionSpec: '16.x'
-
+      - template: .azure-template/bootstrap.yml
+      - script: $NVM_DIR/versions/node/`node --version`/bin/appium driver install uiautomator2
+        displayName: Install UIA2 driver
       - script: |
-          npm ci
-          npm test
-        displayName: 'npm test'
-
-  - job: ANDROID
-    pool:
-      vmImage: 'macOS-latest'
-
+          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;$(ANDROID_EMU_TARGET);$(ANDROID_EMU_TAG);$(ANDROID_EMU_ABI)'
+          echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n "$(ANDROID_EMU_NAME)" -k 'system-images;$(ANDROID_EMU_TARGET);$(ANDROID_EMU_TAG);$(ANDROID_EMU_ABI)' --force
+          echo $ANDROID_HOME/emulator/emulator -list-avds
+          
+          echo "Starting emulator"
+          nohup $ANDROID_HOME/emulator/emulator -avd "$(ANDROID_EMU_NAME)" -no-snapshot -delay-adb > /dev/null 2>&1 &
+          $ANDROID_HOME/platform-tools/adb wait-for-device
+          $ANDROID_HOME/platform-tools/adb devices -l
+          echo "Emulator started"
+        displayName: Emulator configuration
+      - script: |
+          PLATFORM=android npm run test-e2e
+        displayName: Android E2E Test
+  - job: iOS_E2E_Tests
+    #  timeoutInMinutes: '90'
     steps:
-      - task: NodeTool@0.200.0
-        inputs:
-          versionSpec: '16.x'
-
+      - template: .azure-template/bootstrap_steps.yml
       - script: |
-          npm ci
-        displayName: 'npm install'
-
-      - bash: |
-          echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
-        displayName: "install Android image"
-      - script: |
-          $ANDROID_HOME/emulator/emulator -list-avds
-          echo '---'
-          echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n test_android_emulator -k 'system-images;android-27;google_apis;x86' --force
-          echo '---'
-          $ANDROID_HOME/emulator/emulator -list-avds
-        displayName: "create AVD"
-      - script: |
-          $ANDROID_HOME/platform-tools/adb devices
-          echo '---'
-          nohup $ANDROID_HOME/emulator/emulator -avd test_android_emulator -no-snapshot > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-          echo '---'
-          $ANDROID_HOME/platform-tools/adb devices
-        displayName: "start Android emulator"
-      - script: |
-          PLATFORM='android' npm run test-e2e
-        displayName: "Android Integration Test"
-  - job: iOS
-    pool:
-      vmImage: 'macOS-latest'
-
-    steps:
-      - task: NodeTool@0.200.0
-        inputs:
-          versionSpec: '16.x'
-
-      - script: |
-          npm ci
-        displayName: 'npm install'
-
-      - script: |
+          sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer
           xcrun simctl list
-          PLATFORM='ios' npm run test-e2e
-        displayName: "iOS Integration Test"
+          target_sim_id=$(xcrun simctl list devices available | grep "$IOS_DEVICE_NAME (" | cut -d "(" -f2 | cut -d ")" -f1)
+          open -Fn "/Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer/Applications/Simulator.app"
+          xcrun simctl bootstatus $target_sim_id -b
+        displayName: Prepare iOS Simulator
+      - script: $NVM_DIR/versions/node/$(node --version)/bin/appium driver install xcuitest
+        displayName: Install XCUITest driver
+      - script: $NVM_DIR/versions/node/$(node --version)/bin/appium driver run xcuitest build-wda
+        displayName: Prebuild XCUITest driver
+      - script: |
+          PLATFORM=ios npm run test-e2e
+        displayName: iOS E2E Test
