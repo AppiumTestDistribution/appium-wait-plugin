@@ -1,6 +1,6 @@
 import { remote } from 'webdriverio';
 import { pluginE2EHarness } from '@appium/plugin-test-support';
-import path from 'path';
+import path, { resolve } from 'path';
 var chai = require('chai'),
   chaiAsPromised = require('chai-as-promised');
 
@@ -21,6 +21,9 @@ const TEST_HOST = 'localhost';
 const TEST_PORT = 4723;
 
 let server;
+const androidApp = resolve('./build/VodQA.apk');
+const iosApp = resolve('./build/vodqa.zip');
+
 const WDIO_PARAMS = {
   connectionRetryCount: 220000,
   hostname: APPIUM_HOST,
@@ -31,8 +34,7 @@ const androidCaps = {
   platformName: 'Android',
   'appium:uiautomator2ServerInstallTimeout': '120000',
   'appium:automationName': 'UIAutomator2',
-  'appium:app':
-    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/VodQA.apk?raw=true',
+  'appium:app': androidApp,
 };
 
 const iOSCaps = {
@@ -40,8 +42,7 @@ const iOSCaps = {
   'appium:automationName': 'XCUITest',
   'appium:deviceName': 'iPhone 14 Pro',
   'appium:platformVersion': '16.2',
-  'appium:app':
-    'https://github.com/AppiumTestDistribution/appium-demo/blob/main/vodqa.zip?raw=true',
+  'appium:app': iosApp,
 };
 
 describe('Set Timeout', () => {
