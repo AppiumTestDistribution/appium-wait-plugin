@@ -37,8 +37,8 @@ jobs:
         displayName: Emulator configuration
       - script: |
           npm ci
-          $NVM_DIR/versions/node/$(node --version)/appium plugin install --source=local .
-          nohup $NVM_DIR/versions/node/$(node --version)/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
+          $NVM_DIR/versions/node/$(node --version)/bin/appium plugin install --source=local .
+          nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
         displayName: Android E2E Test
   - job: iOS_E2E_Tests
     #  timeoutInMinutes: '90'
@@ -57,6 +57,6 @@ jobs:
         displayName: Prebuild XCUITest driver
       - script: |
           npm ci
-          $NVM_DIR/versions/node/$(node --version)/appium plugin install --source=local .
-          nohup $NVM_DIR/versions/node/$(node --version)/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
+          $NVM_DIR/versions/node/$(node --version)/bin/appium plugin install --source=local .
+          nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
         displayName: iOS E2E Test
