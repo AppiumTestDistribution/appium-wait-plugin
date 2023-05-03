@@ -58,5 +58,6 @@ jobs:
         displayName: Prebuild XCUITest driver
       - script: |
           npm ci
+          nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
           PLATFORM=ios npm run test-e2e
         displayName: iOS E2E Test
