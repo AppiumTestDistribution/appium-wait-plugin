@@ -33,6 +33,8 @@ const iOSCaps = {
   'appium:deviceName': 'iPhone 12',
   'appium:platformVersion': '16.2',
   'appium:app': iosApp,
+  'appium:usePrebuiltWDA': true,
+  'appium:wdaLaunchTimeout': 120000
 };
 
 describe('Set Timeout', () => {
