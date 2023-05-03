@@ -8,7 +8,7 @@ chai.use(chaiAsPromised);
 should = chai.should();
 let expect = chai.expect;
 
-const APPIUM_HOST = 'localhost';
+const APPIUM_HOST = '127.0.0.1';
 const DEFAULT_TIMEOUT_VALUE = { timeout: 10000, intervalBetweenAttempts: 500 };
 
 const androidApp = resolve('./build/VodQA.apk');
