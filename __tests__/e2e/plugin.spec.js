@@ -9,7 +9,7 @@ should = chai.should();
 let expect = chai.expect;
 
 const APPIUM_HOST = 'localhost';
-const FAKE_ARGS = { timeout: 10000, intervalBetweenAttempts: 1000 };
+const DEFAULT_TIMEOUT_VALUE = { timeout: 10000, intervalBetweenAttempts: 500 };
 
 const androidApp = resolve('./build/VodQA.apk');
 const iosApp = resolve('./build/vodqa.zip');
@@ -46,7 +46,9 @@ describe('Set Timeout', () => {
     });
     it('Should be able to set and get waitPlugin timeout', async () => {
       await driver.$('~login').click();
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(
+        DEFAULT_TIMEOUT_VALUE
+      );
       await driver.executeScript('plugin: setWaitTimeout', [
         {
           timeout: 1111,
