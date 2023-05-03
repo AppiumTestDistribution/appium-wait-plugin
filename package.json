@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "scripts": {
     "test": "mocha --require ts-node/register __tests__/plugin.spec.js --timeout 60000 --exit",
-    "test-e2e": "wait-on http://localhost:4723/wd/hub/status && mocha --require ts-node/register -p __tests__/e2e/plugin.spec.js --timeout 160000",
+    "test-e2e": "mocha --require ts-node/register -p __tests__/e2e/plugin.spec.js --timeout 160000",
     "build": "npx tsc",
     "prepublish": "npx tsc",
     "prettier": "prettier src --write --single-quote",
