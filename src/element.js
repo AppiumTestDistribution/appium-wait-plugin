@@ -123,13 +123,14 @@ function sessionInfo(driver) {
 
 async function elementState(sessionInfo, strategy, selector, driver) {
   let automationName = _getAutomationName(driver);
+  let postBody;
   if (automationName === 'XCUITest') {
-    this.body = JSON.stringify({
+    postBody = JSON.stringify({
       using: strategy,
       value: selector,
     });
   } else {
-    this.body = JSON.stringify({
+    postBody = JSON.stringify({
       strategy,
       selector,
       context: '',
@@ -139,7 +140,7 @@ async function elementState(sessionInfo, strategy, selector, driver) {
   const response = await fetch(
     `${sessionInfo.baseUrl}session/${sessionInfo.jwProxySession}/element`,
     {
-      body: this.body,
+      body: postBody,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     }
