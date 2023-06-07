@@ -108,7 +108,7 @@ function _getAutomationName(driver) {
 function sessionInfo(driver) {
   if (driver.caps.automationName === 'Fake') return;
   const automationName = _getAutomationName(driver);
-  if (automationName === 'XCUITest') {
+  if (automationName === 'XCuiTest') {
     return {
       baseUrl: `${driver.wda.webDriverAgentUrl}`,
       jwProxySession: driver.wda.jwproxy.sessionId,
@@ -124,7 +124,7 @@ function sessionInfo(driver) {
 async function elementState(sessionInfo, strategy, selector, driver) {
   let automationName = _getAutomationName(driver);
   let postBody;
-  if (automationName === 'XCUITest') {
+  if (automationName === 'XCuiTest') {
     postBody = JSON.stringify({
       using: strategy,
       value: selector,
