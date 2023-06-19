@@ -30,7 +30,9 @@ export default class WaitCommandPlugin extends BasePlugin {
 
     'plugin: setWaitTimeout': {
       command: 'setWait',
-      params: { required: ['timeout', 'intervalBetweenAttempts'] },
+      params: {
+        optional: ['timeout', 'intervalBetweenAttempts', 'elementEnabledCheckExclusionCmdsList'],
+      },
     },
   });
 
@@ -38,8 +40,18 @@ export default class WaitCommandPlugin extends BasePlugin {
     return await this.executeMethod(next, driver, script, args);
   }
 
-  async setWait(next, driver, timeout, intervalBetweenAttempts) {
-    await setWait(driver, { timeout, intervalBetweenAttempts });
+  async setWait(
+    next,
+    driver,
+    timeout,
+    intervalBetweenAttempts,
+    elementEnabledCheckExclusionCmdsList
+  ) {
+    await setWait(driver, {
+      timeout,
+      intervalBetweenAttempts,
+      elementEnabledCheckExclusionCmdsList,
+    });
   }
 
   async getWaitTimeout(next, driver) {
@@ -54,10 +66,19 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async handle(next, driver, cmdName, ...args) {
     const includeCommands = ['click', 'setValue', 'clear'];
-    if (includeCommands.includes(cmdName)) {
+    const timeoutProp = _getTimeout(driver.sessionId);
+    let executeCommands = [];
+    if (timeoutProp) {
+      executeCommands = timeoutProp.elementEnabledCheckExclusionCmdsList;
+    }
+    if (includeCommands.includes(cmdName) && !executeCommands.includes(cmdName)) {
       log.info('Wait for element to be clickable');
       await elementEnabled(driver, args[0]);
       log.info('Element is enabled');
+    } else if (executeCommands.includes(cmdName)) {
+      log.info(
+        `Skipping 'elementEnabled' as ${cmdName} is present in element EnabledCheck Exclusion List.`
+      );
     }
     return await next();
   }

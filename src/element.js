@@ -4,14 +4,22 @@ import ora from 'ora';
 import { errors } from 'appium/driver';
 
 let map = new Map();
+const defaultTimeOuts = {
+  timeout: 10000,
+  intervalBetweenAttempts: 500,
+  elementEnabledCheckExclusionCmdsList: [],
+};
 
 export async function find(driver, args) {
-  let elementWaitProps;
-  if (driver.opts.plugin !== undefined && driver.opts.plugin['element-wait'] !== undefined) {
-    elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
-  }
   const session = driver.sessionId;
-  _setTimeout(elementWaitProps, session);
+  const currentTimeouts = _getTimeout(session);
+  if (!currentTimeouts) {
+    let elementWaitProps;
+    if (driver.opts.plugin !== undefined && driver.opts.plugin['element-wait'] !== undefined) {
+      elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
+    }
+    _setTimeout(elementWaitProps, session);
+  }
   let timeoutProp = _getTimeout(session);
   const locatorArgs = JSON.parse(JSON.stringify(args));
   const strategy = locatorArgs[0];
@@ -148,37 +156,36 @@ async function elementState(sessionInfo, strategy, selector, driver) {
   return await response.json();
 }
 
-function _setTimeout(
-  elementWaitProps = {
-    timeout: 10000,
-    intervalBetweenAttempts: 500,
-    overrideTimeout: false,
-  },
-  session,
-  overrideTimeout = false
-) {
-  if (overrideTimeout && map.has(session)) {
-    map.delete(session);
+function _setTimeout(elementWaitProps = defaultTimeOuts, session, overrideTimeout = false) {
+  if (!overrideTimeout) {
+    map.set(session, elementWaitProps);
+    log.info(
+      `Timeout properties are set/reset for session ${session} as ${JSON.stringify(
+        _getTimeout(session)
+      )}`
+    );
+    return;
   }
-  if (!map.has(session)) {
-    log.info(`Timeout properties not set for session ${session}, trying to set one`);
-    let defaultTimeoutProp = elementWaitProps;
-    if (
-      elementWaitProps.timeout !== undefined &&
-      elementWaitProps.timeout !== defaultTimeoutProp.timeout
-    ) {
-      defaultTimeoutProp.timeout = elementWaitProps.timeout;
-      log.info(`Timeout is set to ${defaultTimeoutProp.timeout}`);
-    }
-    if (
-      elementWaitProps.intervalBetweenAttempts !== undefined &&
-      elementWaitProps.intervalBetweenAttempts !== defaultTimeoutProp.intervalBetweenAttempts
-    ) {
-      defaultTimeoutProp.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
-      log.info(`Internal between attempts is set to ${defaultTimeoutProp.intervalBetweenAttempts}`);
-    }
-    map.set(session, defaultTimeoutProp);
+  let newtimeouts = Object.assign({}, _getTimeout(session));
+  if (elementWaitProps.timeout) {
+    newtimeouts.timeout = elementWaitProps.timeout;
   }
+  if (elementWaitProps.intervalBetweenAttempts) {
+    newtimeouts.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
+  }
+  if (elementWaitProps.elementEnabledCheckExclusionCmdsList) {
+    newtimeouts.elementEnabledCheckExclusionCmdsList =
+      elementWaitProps.elementEnabledCheckExclusionCmdsList;
+  }
+
+  newtimeouts.timeout = newtimeouts.timeout || defaultTimeOuts.timeout;
+  newtimeouts.intervalBetweenAttempts =
+    newtimeouts.intervalBetweenAttempts || defaultTimeOuts.intervalBetweenAttempts;
+  newtimeouts.elementEnabledCheckExclusionCmdsList =
+    newtimeouts.elementEnabledCheckExclusionCmdsList ||
+    defaultTimeOuts.elementEnabledCheckExclusionCmdsList;
+
+  map.set(session, newtimeouts);
   log.info(
     `Timeout properties set for session ${session} is ${JSON.stringify(_getTimeout(session))} ms`
   );

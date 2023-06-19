@@ -11,7 +11,11 @@ let expect = chai.expect;
 import axios from 'axios';
 
 const APPIUM_HOST = 'localhost';
-const FAKE_ARGS = { timeout: 10000, intervalBetweenAttempts: 1000 };
+const FAKE_ARGS = {
+  timeout: 10000,
+  intervalBetweenAttempts: 100,
+  elementEnabledCheckExclusionCmdsList: ['clear', 'click'],
+};
 const FAKE_PLUGIN_ARGS = { 'element-wait': FAKE_ARGS };
 
 const THIS_PLUGIN_DIR = path.join(__dirname, '..', '..');
@@ -73,6 +77,38 @@ describe('Set Timeout', () => {
       expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
+        elementEnabledCheckExclusionCmdsList: FAKE_ARGS.elementEnabledCheckExclusionCmdsList,
+      });
+    });
+
+    it('Should be able to override timeout alone', async () => {
+      await driver.$('id=AlertButton');
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          timeout: 1111,
+          elementEnabledCheckExclusionCmdsList: ['setValue'],
+        },
+      ]);
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+        timeout: 1111,
+        intervalBetweenAttempts: FAKE_ARGS.intervalBetweenAttempts,
+        elementEnabledCheckExclusionCmdsList: ['setValue'],
+      });
+    });
+
+    it('Should be able to override intervalBetweenAttempts alone', async () => {
+      await driver.$('id=AlertButton');
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          intervalBetweenAttempts: 10,
+        },
+      ]);
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+        timeout: FAKE_ARGS.timeout,
+        intervalBetweenAttempts: 10,
+        elementEnabledCheckExclusionCmdsList: FAKE_ARGS.elementEnabledCheckExclusionCmdsList,
       });
     });
 
@@ -109,20 +145,69 @@ describe('Set Timeout', () => {
     });
 
     it('Should be able to set and get waitPlugin timeout', async () => {
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.be.null;
+
       await driver.$('#AlertButton');
       expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
         timeout: 10000,
         intervalBetweenAttempts: 500,
+        elementEnabledCheckExclusionCmdsList: [],
       });
+
       await driver.executeScript('plugin: setWaitTimeout', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
+          elementEnabledCheckExclusionCmdsList: ['click'],
         },
       ]);
+      await driver.$('#AlertButton');
       expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
+        elementEnabledCheckExclusionCmdsList: ['click'],
+      });
+    });
+
+    // Covered partial timeout setting scenario before defaults are set
+    it('Should be able to override timeout alone', async () => {
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          timeout: 10012,
+        },
+      ]);
+      await driver.$('id=AlertButton');
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+        timeout: 10012,
+        intervalBetweenAttempts: 500,
+      });
+    });
+
+    it('Should be able to override intervalBetweenAttempts alone', async () => {
+      await driver.$('id=AlertButton');
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          intervalBetweenAttempts: 12,
+        },
+      ]);
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+        timeout: 10000,
+        intervalBetweenAttempts: 12,
+      });
+    });
+
+    it('Should be able to override elementEnabledCheckExclusionCmdsList alone', async () => {
+      await driver.executeScript('plugin: setWaitTimeout', [
+        {
+          elementEnabledCheckExclusionCmdsList: ['click'],
+        },
+      ]);
+      let element = await driver.$('id=AlertButton');
+      await element.click();
+      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+        timeout: 10000,
+        intervalBetweenAttempts: 500,
+        elementEnabledCheckExclusionCmdsList: ['click'],
       });
     });
 
