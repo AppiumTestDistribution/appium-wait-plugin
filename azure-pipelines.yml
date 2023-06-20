@@ -37,9 +37,10 @@ jobs:
         displayName: Emulator configuration
       - script: |
           npm ci
+          npm install -g wait-on
           $NVM_DIR/versions/node/$(node --version)/bin/appium plugin install --source=local .
           nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
-          wait-on http://0.0.0.0:4723/wd/hub/status
+          wait-on http://127.0.0.1:4723/wd/hub/status
           PLATFORM=android npm run test-e2e
         displayName: Android E2E Test
   - job: iOS_E2E_Tests
@@ -49,7 +50,6 @@ jobs:
     steps:
       - template: .azure-template/bootstrap.yml
       - script: |
-          npm install -g wait-on
           sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app/Contents/Developer
           xcrun simctl list
           target_sim_id=$(xcrun simctl list devices available | grep "$IOS_DEVICE_NAME (" | cut -d "(" -f2 | cut -d ")" -f1)
@@ -62,7 +62,8 @@ jobs:
         displayName: Prebuild XCUITest driver
       - script: |
           npm ci
+          npm install -g wait-on
           nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
-          wait-on http://0.0.0.0:4723/wd/hub/status
+          wait-on http://127.0.0.1:4723/wd/hub/status
           PLATFORM=ios npm run test-e2e
         displayName: iOS E2E Test
