@@ -73,14 +73,14 @@ describe('Set Timeout', () => {
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
-          excludeEnabledCheck: ['click'],
+          excludeEnabledCheck: ['setValue'],
         },
       ]);
       await driver.$('~login').click();
       expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
-        excludeEnabledCheck: ['click'],
+        excludeEnabledCheck: ['setValue'],
       });
     });
 
