@@ -1,37 +1,21 @@
 import { BasePlugin } from 'appium/plugin';
-import { find, elementEnabled, setWait, _getTimeout } from './element';
+import { find, elementEnabled, setPluginProperties, _getPluginProperties } from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
   constructor(name, cliArgs = {}) {
     super(name, cliArgs);
     this.name = name;
   }
-  // this plugin supports a non-standard 'compare images' command
-  static newMethodMap = {
-    '/session/:sessionId/waitplugin/timeout': {
-      POST: {
-        command: 'setWait',
-        payloadParams: { required: ['data'] },
-        neverProxy: true,
-      },
-    },
-    '/session/:sessionId/waitplugin/getTimeout': {
-      GET: {
-        command: 'getWaitTimeout',
-        neverProxy: true,
-      },
-    },
-  };
 
   static executeMethodMap = /** @type {const} */ ({
-    'plugin: getWaitTimeout': {
-      command: 'getWaitTimeout',
+    'plugin: getWaitPluginProperties': {
+      command: 'getPluginProperties',
     },
 
-    'plugin: setWaitTimeout': {
-      command: 'setWait',
+    'plugin: setWaitPluginProperties': {
+      command: 'setPluginProperties',
       params: {
-        optional: ['timeout', 'intervalBetweenAttempts', 'elementEnabledCheckExclusionCmdsList'],
+        optional: ['timeout', 'intervalBetweenAttempts', 'excludeEnabledCheck'],
       },
     },
   });
@@ -40,22 +24,16 @@ export default class WaitCommandPlugin extends BasePlugin {
     return await this.executeMethod(next, driver, script, args);
   }
 
-  async setWait(
-    next,
-    driver,
-    timeout,
-    intervalBetweenAttempts,
-    elementEnabledCheckExclusionCmdsList
-  ) {
-    await setWait(driver, {
+  async setPluginProperties(next, driver, timeout, intervalBetweenAttempts, excludeEnabledCheck) {
+    await setPluginProperties(driver, {
       timeout,
       intervalBetweenAttempts,
-      elementEnabledCheckExclusionCmdsList,
+      excludeEnabledCheck,
     });
   }
 
-  async getWaitTimeout(next, driver) {
-    return await _getTimeout(driver.sessionId);
+  async getPluginProperties(next, driver) {
+    return await _getPluginProperties(driver.sessionId);
   }
 
   async findElement(next, driver, ...args) {
@@ -66,10 +44,10 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async handle(next, driver, cmdName, ...args) {
     const includeCommands = ['click', 'setValue', 'clear'];
-    const timeoutProp = _getTimeout(driver.sessionId);
+    const timeoutProp = _getPluginProperties(driver.sessionId);
     let executeCommands = [];
     if (timeoutProp) {
-      executeCommands = timeoutProp.elementEnabledCheckExclusionCmdsList;
+      executeCommands = timeoutProp.excludeEnabledCheck;
     }
     if (includeCommands.includes(cmdName) && !executeCommands.includes(cmdName)) {
       log.info('Wait for element to be clickable');

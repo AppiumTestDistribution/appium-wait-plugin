@@ -7,20 +7,20 @@ let map = new Map();
 const defaultTimeOuts = {
   timeout: 10000,
   intervalBetweenAttempts: 500,
-  elementEnabledCheckExclusionCmdsList: [],
+  excludeEnabledCheck: [],
 };
 
 export async function find(driver, args) {
   const session = driver.sessionId;
-  const currentTimeouts = _getTimeout(session);
+  const currentTimeouts = _getPluginProperties(session);
   if (!currentTimeouts) {
     let elementWaitProps;
     if (driver.opts.plugin !== undefined && driver.opts.plugin['element-wait'] !== undefined) {
       elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
     }
-    _setTimeout(elementWaitProps, session);
+    _setPluginProperties(elementWaitProps, session);
   }
-  let timeoutProp = _getTimeout(session);
+  let timeoutProp = _getPluginProperties(session);
   const locatorArgs = JSON.parse(JSON.stringify(args));
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
@@ -72,16 +72,16 @@ export async function find(driver, args) {
   }
 }
 
-export function _getTimeout(session) {
+export function _getPluginProperties(session) {
   return map.get(session);
 }
 
-export async function setWait(driver, args) {
-  _setTimeout(args, driver.sessionId, true);
+export async function setPluginProperties(driver, args) {
+  _setPluginProperties(args, driver.sessionId, true);
 }
 
 export async function elementEnabled(driver, el) {
-  let timeoutProp = _getTimeout(driver.sessionId);
+  let timeoutProp = _getPluginProperties(driver.sessionId);
   const predicate = async () => {
     const element = await driver.elementEnabled(el);
     if (element) {
@@ -104,6 +104,7 @@ export async function elementEnabled(driver, el) {
     }
   }
 }
+
 async function elementIsDisplayed(driver, element) {
   log.info('Check if element is displayed');
   return await driver.elementDisplayed(element);
@@ -116,7 +117,7 @@ function _getAutomationName(driver) {
 function sessionInfo(driver) {
   if (driver.caps.automationName === 'Fake') return;
   const automationName = _getAutomationName(driver);
-  if (automationName === 'XCuiTest') {
+  if (automationName.toLowerCase() === 'xcuitest') {
     return {
       baseUrl: `${driver.wda.webDriverAgentUrl}`,
       jwProxySession: driver.wda.jwproxy.sessionId,
@@ -132,7 +133,7 @@ function sessionInfo(driver) {
 async function elementState(sessionInfo, strategy, selector, driver) {
   let automationName = _getAutomationName(driver);
   let postBody;
-  if (automationName === 'XCuiTest') {
+  if (automationName.toLowerCase() === 'xcuitest') {
     postBody = JSON.stringify({
       using: strategy,
       value: selector,
@@ -156,37 +157,41 @@ async function elementState(sessionInfo, strategy, selector, driver) {
   return await response.json();
 }
 
-function _setTimeout(elementWaitProps = defaultTimeOuts, session, overrideTimeout = false) {
+function _setPluginProperties(
+  elementWaitProps = defaultTimeOuts,
+  session,
+  overrideTimeout = false
+) {
   if (!overrideTimeout) {
     map.set(session, elementWaitProps);
     log.info(
       `Timeout properties are set/reset for session ${session} as ${JSON.stringify(
-        _getTimeout(session)
+        _getPluginProperties(session)
       )}`
     );
     return;
   }
-  let newtimeouts = Object.assign({}, _getTimeout(session));
+  let newtimeouts = Object.assign({}, _getPluginProperties(session));
   if (elementWaitProps.timeout) {
     newtimeouts.timeout = elementWaitProps.timeout;
   }
   if (elementWaitProps.intervalBetweenAttempts) {
     newtimeouts.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
   }
-  if (elementWaitProps.elementEnabledCheckExclusionCmdsList) {
-    newtimeouts.elementEnabledCheckExclusionCmdsList =
-      elementWaitProps.elementEnabledCheckExclusionCmdsList;
+  if (elementWaitProps.excludeEnabledCheck) {
+    newtimeouts.excludeEnabledCheck = elementWaitProps.excludeEnabledCheck;
   }
 
   newtimeouts.timeout = newtimeouts.timeout || defaultTimeOuts.timeout;
   newtimeouts.intervalBetweenAttempts =
     newtimeouts.intervalBetweenAttempts || defaultTimeOuts.intervalBetweenAttempts;
-  newtimeouts.elementEnabledCheckExclusionCmdsList =
-    newtimeouts.elementEnabledCheckExclusionCmdsList ||
-    defaultTimeOuts.elementEnabledCheckExclusionCmdsList;
+  newtimeouts.excludeEnabledCheck =
+    newtimeouts.excludeEnabledCheck || defaultTimeOuts.excludeEnabledCheck;
 
   map.set(session, newtimeouts);
   log.info(
-    `Timeout properties set for session ${session} is ${JSON.stringify(_getTimeout(session))} ms`
+    `Timeout properties set for session ${session} is ${JSON.stringify(
+      _getPluginProperties(session)
+    )} ms`
   );
 }

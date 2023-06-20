@@ -14,7 +14,7 @@ const APPIUM_HOST = 'localhost';
 const FAKE_ARGS = {
   timeout: 10000,
   intervalBetweenAttempts: 100,
-  elementEnabledCheckExclusionCmdsList: ['clear', 'click'],
+  excludeEnabledCheck: ['clear', 'click'],
 };
 const FAKE_PLUGIN_ARGS = { 'element-wait': FAKE_ARGS };
 
@@ -67,48 +67,48 @@ describe('Set Timeout', () => {
     });
     it('Should be able to set and get waitPlugin timeout', async () => {
       await driver.$('id=AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
-      await driver.executeScript('plugin: setWaitTimeout', [
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(FAKE_ARGS);
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
         },
       ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
-        elementEnabledCheckExclusionCmdsList: FAKE_ARGS.elementEnabledCheckExclusionCmdsList,
+        excludeEnabledCheck: FAKE_ARGS.excludeEnabledCheck,
       });
     });
 
     it('Should be able to override timeout alone', async () => {
       await driver.$('id=AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
-      await driver.executeScript('plugin: setWaitTimeout', [
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(FAKE_ARGS);
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
-          elementEnabledCheckExclusionCmdsList: ['setValue'],
+          excludeEnabledCheck: ['setValue'],
         },
       ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: FAKE_ARGS.intervalBetweenAttempts,
-        elementEnabledCheckExclusionCmdsList: ['setValue'],
+        excludeEnabledCheck: ['setValue'],
       });
     });
 
     it('Should be able to override intervalBetweenAttempts alone', async () => {
       await driver.$('id=AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
-      await driver.executeScript('plugin: setWaitTimeout', [
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(FAKE_ARGS);
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           intervalBetweenAttempts: 10,
         },
       ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: FAKE_ARGS.timeout,
         intervalBetweenAttempts: 10,
-        elementEnabledCheckExclusionCmdsList: FAKE_ARGS.elementEnabledCheckExclusionCmdsList,
+        excludeEnabledCheck: FAKE_ARGS.excludeEnabledCheck,
       });
     });
 
@@ -145,39 +145,39 @@ describe('Set Timeout', () => {
     });
 
     it('Should be able to set and get waitPlugin timeout', async () => {
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.be.null;
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.be.null;
 
       await driver.$('#AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 10000,
         intervalBetweenAttempts: 500,
-        elementEnabledCheckExclusionCmdsList: [],
+        excludeEnabledCheck: [],
       });
 
-      await driver.executeScript('plugin: setWaitTimeout', [
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
-          elementEnabledCheckExclusionCmdsList: ['click'],
+          excludeEnabledCheck: ['click'],
         },
       ]);
       await driver.$('#AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
-        elementEnabledCheckExclusionCmdsList: ['click'],
+        excludeEnabledCheck: ['click'],
       });
     });
 
     // Covered partial timeout setting scenario before defaults are set
     it('Should be able to override timeout alone', async () => {
-      await driver.executeScript('plugin: setWaitTimeout', [
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 10012,
         },
       ]);
       await driver.$('id=AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 10012,
         intervalBetweenAttempts: 500,
       });
@@ -185,29 +185,29 @@ describe('Set Timeout', () => {
 
     it('Should be able to override intervalBetweenAttempts alone', async () => {
       await driver.$('id=AlertButton');
-      await driver.executeScript('plugin: setWaitTimeout', [
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           intervalBetweenAttempts: 12,
         },
       ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 10000,
         intervalBetweenAttempts: 12,
       });
     });
 
-    it('Should be able to override elementEnabledCheckExclusionCmdsList alone', async () => {
-      await driver.executeScript('plugin: setWaitTimeout', [
+    it('Should be able to override excludeEnabledCheck alone', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
-          elementEnabledCheckExclusionCmdsList: ['click'],
+          excludeEnabledCheck: ['click'],
         },
       ]);
       let element = await driver.$('id=AlertButton');
       await element.click();
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 10000,
         intervalBetweenAttempts: 500,
-        elementEnabledCheckExclusionCmdsList: ['click'],
+        excludeEnabledCheck: ['click'],
       });
     });
 
