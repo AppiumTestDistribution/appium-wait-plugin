@@ -3,8 +3,7 @@ import {
   find,
   elementEnabled,
   setPluginProperties,
-  _setPluginProperties,
-  _getPluginProperties,
+  getPluginProperties,
   defaultTimeOuts,
 } from './element';
 import log from './logger';
@@ -33,7 +32,7 @@ export default class WaitCommandPlugin extends BasePlugin {
   }
 
   async setPluginProperties(next, driver, timeout, intervalBetweenAttempts, excludeEnabledCheck) {
-    await setPluginProperties(driver, {
+    await setPluginProperties(driver.sessionId, {
       timeout,
       intervalBetweenAttempts,
       excludeEnabledCheck,
@@ -41,7 +40,7 @@ export default class WaitCommandPlugin extends BasePlugin {
   }
 
   async getPluginProperties(next, driver) {
-    return await _getPluginProperties(driver.sessionId);
+    return await getPluginProperties(driver.sessionId);
   }
 
   async createSession(next) {
@@ -49,7 +48,7 @@ export default class WaitCommandPlugin extends BasePlugin {
       const result = await next();
       const sessionId = result.value[0];
       const props = Object.assign({}, defaultTimeOuts, this.cliArgs);
-      _setPluginProperties(props, sessionId);
+      await setPluginProperties(sessionId, props);
       return result;
     } catch (err) {
       log.error('Failed to create sessions');
@@ -65,7 +64,7 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async handle(next, driver, cmdName, ...args) {
     const includeCommands = ['click', 'setValue', 'clear'];
-    const timeoutProp = _getPluginProperties(driver.sessionId);
+    const timeoutProp = getPluginProperties(driver.sessionId);
     let executeCommands = [];
     if (timeoutProp) {
       executeCommands = timeoutProp.excludeEnabledCheck;
@@ -74,10 +73,6 @@ export default class WaitCommandPlugin extends BasePlugin {
       log.info('Wait for element to be clickable');
       await elementEnabled(driver, args[0]);
       log.info('Element is enabled');
-    } else if (executeCommands.includes(cmdName)) {
-      log.info(
-        `Skipping 'elementEnabled' as ${cmdName} is present in element EnabledCheck Exclusion List.`
-      );
     }
     return await next();
   }

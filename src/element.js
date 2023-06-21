@@ -64,12 +64,12 @@ export async function find(driver, args) {
   }
 }
 
-export function _getPluginProperties(session) {
-  return map.get(session);
+export async function getPluginProperties(sessionId) {
+  return _getPluginProperties(sessionId);
 }
 
-export async function setPluginProperties(driver, args) {
-  _setPluginProperties(args, driver.sessionId);
+export async function setPluginProperties(sessionId, args) {
+  _setPluginProperties(args, sessionId);
 }
 
 export async function elementEnabled(driver, el) {
@@ -149,8 +149,12 @@ async function elementState(sessionInfo, strategy, selector, driver) {
   return await response.json();
 }
 
-export function _setPluginProperties(elementWaitProps, session) {
-  const props = _getPluginProperties(session) || Object.assign({}, defaultTimeOuts);
+function _getPluginProperties(sessionId) {
+  return map.get(sessionId);
+}
+
+function _setPluginProperties(elementWaitProps, sessionId) {
+  const props = _getPluginProperties(sessionId) || Object.assign({}, defaultTimeOuts);
   props.timeout = elementWaitProps.timeout || props.timeout;
   props.intervalBetweenAttempts =
     elementWaitProps.intervalBetweenAttempts || props.intervalBetweenAttempts;
@@ -170,10 +174,10 @@ export function _setPluginProperties(elementWaitProps, session) {
     throw new Error('Wait plugin properties didnot match contract.');
   }
 
-  map.set(session, props);
+  map.set(sessionId, props);
   log.info(
-    `Timeout properties set for session ${session} is ${JSON.stringify(
-      _getPluginProperties(session)
+    `Timeout properties set for session ${sessionId} is ${JSON.stringify(
+      _getPluginProperties(sessionId)
     )}`
   );
 }
