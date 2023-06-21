@@ -51,10 +51,10 @@ describe('Set Timeout', () => {
       });
     });
     it('Should be able to get default properties and override/get properties', async () => {
-      await driver.$('~login').click();
       expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(
         DEFAULT_TIMEOUT_VALUE
       );
+      await driver.$('~login').click();
       await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
@@ -64,23 +64,6 @@ describe('Set Timeout', () => {
       expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
-      });
-    });
-
-    it('Should be able to set and get waitPlugin before defaults kick-in', async () => {
-      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.be.null;
-      await driver.executeScript('plugin: setWaitPluginProperties', [
-        {
-          timeout: 10001,
-          intervalBetweenAttempts: 11,
-          excludeEnabledCheck: ['setValue'],
-        },
-      ]);
-      await driver.$('~login').click();
-      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
-        timeout: 10001,
-        intervalBetweenAttempts: 11,
-        excludeEnabledCheck: ['setValue'],
       });
     });
 

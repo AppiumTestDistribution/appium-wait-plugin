@@ -49,6 +49,8 @@ export default class WaitCommandPlugin extends BasePlugin {
       const sessionId = result.value[0];
       const props = Object.assign({}, defaultTimeOuts, this.cliArgs);
       await setPluginProperties(sessionId, props);
+      const propset = await getPluginProperties(sessionId);
+      log.info(`session ${sessionId} is created with ${JSON.stringify(propset)}`);
       return result;
     } catch (err) {
       log.error('Failed to create sessions');
@@ -64,7 +66,7 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async handle(next, driver, cmdName, ...args) {
     const includeCommands = ['click', 'setValue', 'clear'];
-    const timeoutProp = getPluginProperties(driver.sessionId);
+    const timeoutProp = await getPluginProperties(driver.sessionId);
     let executeCommands = [];
     if (timeoutProp) {
       executeCommands = timeoutProp.excludeEnabledCheck;
