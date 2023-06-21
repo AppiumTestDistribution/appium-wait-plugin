@@ -1,9 +1,17 @@
 import { BasePlugin } from 'appium/plugin';
-import { find, elementEnabled, setPluginProperties, _getPluginProperties } from './element';
+import {
+  find,
+  elementEnabled,
+  setPluginProperties,
+  _setPluginProperties,
+  _getPluginProperties,
+  defaultTimeOuts,
+} from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
   constructor(name, cliArgs = {}) {
     super(name, cliArgs);
+    this.cliArgs = cliArgs;
     this.name = name;
   }
 
@@ -34,6 +42,19 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async getPluginProperties(next, driver) {
     return await _getPluginProperties(driver.sessionId);
+  }
+
+  async createSession(next) {
+    try {
+      const result = await next();
+      const sessionId = result.value[0];
+      const props = Object.assign({}, defaultTimeOuts, this.cliArgs);
+      _setPluginProperties(props, sessionId);
+      return result;
+    } catch (err) {
+      log.error('Failed to create sessions');
+      throw err;
+    }
   }
 
   async findElement(next, driver, ...args) {
