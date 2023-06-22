@@ -50,7 +50,7 @@ To override the default element-wait retry
 1. Use appium server CLI
 	--plugin-element-wait-timeout=30000
 	--plugin-element-wait-interval-between-attempts=200 
-	--plugin-element-wait-element-enabled-check-exclusion-cmds-list=['click']
+	--plugin-element-wait-exclude-enabled-check="click,clear"
 	
 
 2. Use appium server config file. [Refer](https://github.com/AppiumTestDistribution/appium-wait-plugin/blob/main/server-config.json). 
@@ -135,7 +135,7 @@ await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
-		  excludeEnabledCheck: ['click','setValue']
+	  excludeEnabledCheck: ['click','setValue']
         },
 ]);
 
