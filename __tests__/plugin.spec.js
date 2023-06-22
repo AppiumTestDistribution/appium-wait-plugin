@@ -9,9 +9,14 @@ chai.use(chaiAsPromised);
 should = chai.should();
 let expect = chai.expect;
 import axios from 'axios';
+import { defaultTimeOuts } from '../src/element';
 
 const APPIUM_HOST = 'localhost';
-const FAKE_ARGS = { timeout: 10000, intervalBetweenAttempts: 1000 };
+const FAKE_ARGS = {
+  timeout: 10000,
+  intervalBetweenAttempts: 100,
+  excludeEnabledCheck: ['clear', 'click'],
+};
 const FAKE_PLUGIN_ARGS = { 'element-wait': FAKE_ARGS };
 
 const THIS_PLUGIN_DIR = path.join(__dirname, '..', '..');
@@ -61,24 +66,74 @@ describe('Set Timeout', () => {
     beforeEach(async () => {
       driver = await remote({ ...WDIO_PARAMS, capabilities });
     });
-    it('Should be able to set and get waitPlugin timeout', async () => {
-      await driver.$('id=AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(FAKE_ARGS);
-      await driver.executeScript('plugin: setWaitTimeout', [
-        {
-          timeout: 1111,
-          intervalBetweenAttempts: 11,
-        },
-      ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
-        timeout: 1111,
-        intervalBetweenAttempts: 11,
-      });
-    });
 
     it('Basic Plugin test', async () => {
       const res = { fake: 'fakeResponse' };
       (await axios.post('http://localhost:4723/fake')).data.should.eql(res);
+    });
+
+    it('Should be able to get default plugin props after session creation', async () => {
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(
+        FAKE_ARGS
+      );
+    });
+
+    it('Should be able to override and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          timeout: 1111,
+          intervalBetweenAttempts: 11,
+          excludeEnabledCheck: ['click'],
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: 1111,
+        intervalBetweenAttempts: 11,
+        excludeEnabledCheck: ['click'],
+      });
+    });
+
+    it('Should be able to override only timeout and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          timeout: 1111,
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: 1111,
+        intervalBetweenAttempts: FAKE_ARGS.intervalBetweenAttempts,
+        excludeEnabledCheck: FAKE_ARGS.excludeEnabledCheck,
+      });
+    });
+
+    it('Should be able to override only intervalBetweenAttempts and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          intervalBetweenAttempts: 900,
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: FAKE_ARGS.timeout,
+        intervalBetweenAttempts: 900,
+        excludeEnabledCheck: FAKE_ARGS.excludeEnabledCheck,
+      });
+    });
+
+    it('Should be able to override only excludeEnabledCheck and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          excludeEnabledCheck: ['clear'],
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: FAKE_ARGS.timeout,
+        intervalBetweenAttempts: FAKE_ARGS.intervalBetweenAttempts,
+        excludeEnabledCheck: ['clear'],
+      });
     });
 
     afterEach(async () => {
@@ -108,26 +163,162 @@ describe('Set Timeout', () => {
       driver = await remote({ ...WDIO_PARAMS, capabilities });
     });
 
-    it('Should be able to set and get waitPlugin timeout', async () => {
-      await driver.$('#AlertButton');
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
-        timeout: 10000,
-        intervalBetweenAttempts: 500,
-      });
-      await driver.executeScript('plugin: setWaitTimeout', [
+    it('Should be able to get default plugin props after session creation', async () => {
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(
+        defaultTimeOuts
+      );
+    });
+
+    it('Should be able to override and get props after session creation', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
+          excludeEnabledCheck: ['click'],
         },
       ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
+        excludeEnabledCheck: ['click'],
+      });
+    });
+
+    it('Should be able to override only timeout and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          timeout: 1111,
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: 1111,
+        intervalBetweenAttempts: defaultTimeOuts.intervalBetweenAttempts,
+        excludeEnabledCheck: defaultTimeOuts.excludeEnabledCheck,
+      });
+    });
+
+    it('Should be able to override only intervalBetweenAttempts and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          intervalBetweenAttempts: 900,
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: defaultTimeOuts.timeout,
+        intervalBetweenAttempts: 900,
+        excludeEnabledCheck: defaultTimeOuts.excludeEnabledCheck,
+      });
+    });
+
+    it('Should be able to override only excludeEnabledCheck and get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          excludeEnabledCheck: ['clear'],
+        },
+      ]);
+      await driver.$('#AlertButton');
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: defaultTimeOuts.timeout,
+        intervalBetweenAttempts: defaultTimeOuts.intervalBetweenAttempts,
+        excludeEnabledCheck: ['clear'],
+      });
+    });
+
+    it('Should be able to override plugin props multiple times get props', async () => {
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          excludeEnabledCheck: ['clear'],
+        },
+      ]);
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          timeout: 8000,
+          excludeEnabledCheck: [],
+        },
+      ]);
+      await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          intervalBetweenAttempts: 800,
+        },
+      ]);
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
+        timeout: 8000,
+        intervalBetweenAttempts: 800,
+        excludeEnabledCheck: [],
       });
     });
 
     afterEach(async () => {
       await driver.deleteSession();
+      if (server) await server.close();
+    });
+  });
+
+  describe('Wrong contract', () => {
+    let driver;
+    pluginE2EHarness({
+      before,
+      after,
+      server,
+      serverArgs: { basePath: '/wd/hub' },
+      port: TEST_PORT,
+      host: TEST_HOST,
+      appiumHome: APPIUM_HOME,
+      driverName: 'fake',
+      driverSource: 'npm',
+      driverSpec: FAKE_DRIVER_DIR,
+      pluginName: 'element-wait',
+      pluginSource: 'local',
+      pluginSpec: '.',
+    });
+    beforeEach(async () => {
+      driver = await remote({ ...WDIO_PARAMS, capabilities });
+    });
+
+    it('Should not be set plugin props with timeout not as number', async () => {
+      await expect(
+        driver.executeScript('plugin: setWaitPluginProperties', [
+          {
+            timeout: '1200',
+          },
+        ])
+      ).to.be.rejectedWith(
+        Error,
+        'An unknown server-side error occurred while processing the command. Original error: Wait plugin properties didnot match contract.'
+      );
+    });
+
+    it('Should not be set plugin props with intervalBetweenAttempts not as number', async () => {
+      await expect(
+        driver.executeScript('plugin: setWaitPluginProperties', [
+          {
+            intervalBetweenAttempts: '30',
+          },
+        ])
+      ).to.be.rejectedWith(
+        Error,
+        'An unknown server-side error occurred while processing the command. Original error: Wait plugin properties didnot match contract.'
+      );
+    });
+
+    it('Should not be set plugin props with excludeEnabledCheck not as Array', async () => {
+      await expect(
+        driver.executeScript('plugin: setWaitPluginProperties', [
+          {
+            excludeEnabledCheck: {},
+          },
+        ])
+      ).to.be.rejectedWith(
+        Error,
+        'An unknown server-side error occurred while processing the command. Original error: Wait plugin properties didnot match contract.'
+      );
+    });
+
+    afterEach(async () => {
+      if (driver) await driver.deleteSession();
       if (server) await server.close();
     });
   });

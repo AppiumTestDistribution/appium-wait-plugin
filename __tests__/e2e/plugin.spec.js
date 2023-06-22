@@ -9,7 +9,11 @@ should = chai.should();
 let expect = chai.expect;
 
 const APPIUM_HOST = '127.0.0.1';
-const DEFAULT_TIMEOUT_VALUE = { timeout: 10000, intervalBetweenAttempts: 500 };
+const DEFAULT_TIMEOUT_VALUE = {
+  timeout: 10000,
+  intervalBetweenAttempts: 500,
+  excludeEnabledCheck: [],
+};
 
 const androidApp = resolve('./build/VodQA.apk');
 const iosApp = resolve('./build/vodqa.zip');
@@ -34,7 +38,7 @@ const iOSCaps = {
   'appium:platformVersion': '16.2',
   'appium:app': iosApp,
   'appium:usePrebuiltWDA': true,
-  'appium:wdaLaunchTimeout': 120000
+  'appium:wdaLaunchTimeout': 120000,
 };
 
 describe('Set Timeout', () => {
@@ -46,18 +50,18 @@ describe('Set Timeout', () => {
         capabilities: process.env.PLATFORM === 'android' ? androidCaps : iOSCaps,
       });
     });
-    it('Should be able to set and get waitPlugin timeout', async () => {
-      await driver.$('~login').click();
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include(
+    it('Should be able to get default properties and override/get properties', async () => {
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include(
         DEFAULT_TIMEOUT_VALUE
       );
-      await driver.executeScript('plugin: setWaitTimeout', [
+      await driver.$('~login').click();
+      await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
         },
       ]);
-      expect(await driver.executeScript('plugin: getWaitTimeout', [])).to.deep.include({
+      expect(await driver.executeScript('plugin: getWaitPluginProperties', [])).to.deep.include({
         timeout: 1111,
         intervalBetweenAttempts: 11,
       });

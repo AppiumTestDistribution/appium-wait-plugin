@@ -1,36 +1,29 @@
 import { BasePlugin } from 'appium/plugin';
-import { find, elementEnabled, setWait, _getTimeout } from './element';
+import {
+  find,
+  elementEnabled,
+  setPluginProperties,
+  getPluginProperties,
+  defaultTimeOuts,
+} from './element';
 import log from './logger';
 export default class WaitCommandPlugin extends BasePlugin {
   constructor(name, cliArgs = {}) {
     super(name, cliArgs);
+    this.cliArgs = cliArgs;
     this.name = name;
   }
-  // this plugin supports a non-standard 'compare images' command
-  static newMethodMap = {
-    '/session/:sessionId/waitplugin/timeout': {
-      POST: {
-        command: 'setWait',
-        payloadParams: { required: ['data'] },
-        neverProxy: true,
-      },
-    },
-    '/session/:sessionId/waitplugin/getTimeout': {
-      GET: {
-        command: 'getWaitTimeout',
-        neverProxy: true,
-      },
-    },
-  };
 
   static executeMethodMap = /** @type {const} */ ({
-    'plugin: getWaitTimeout': {
-      command: 'getWaitTimeout',
+    'plugin: getWaitPluginProperties': {
+      command: 'getPluginProperties',
     },
 
-    'plugin: setWaitTimeout': {
-      command: 'setWait',
-      params: { required: ['timeout', 'intervalBetweenAttempts'] },
+    'plugin: setWaitPluginProperties': {
+      command: 'setPluginProperties',
+      params: {
+        optional: ['timeout', 'intervalBetweenAttempts', 'excludeEnabledCheck'],
+      },
     },
   });
 
@@ -38,12 +31,31 @@ export default class WaitCommandPlugin extends BasePlugin {
     return await this.executeMethod(next, driver, script, args);
   }
 
-  async setWait(next, driver, timeout, intervalBetweenAttempts) {
-    await setWait(driver, { timeout, intervalBetweenAttempts });
+  async setPluginProperties(next, driver, timeout, intervalBetweenAttempts, excludeEnabledCheck) {
+    await setPluginProperties(driver.sessionId, {
+      timeout,
+      intervalBetweenAttempts,
+      excludeEnabledCheck,
+    });
   }
 
-  async getWaitTimeout(next, driver) {
-    return await _getTimeout(driver.sessionId);
+  async getPluginProperties(next, driver) {
+    return await getPluginProperties(driver.sessionId);
+  }
+
+  async createSession(next) {
+    try {
+      const result = await next();
+      const sessionId = result.value[0];
+      const props = Object.assign({}, defaultTimeOuts, this.cliArgs);
+      await setPluginProperties(sessionId, props);
+      const propset = await getPluginProperties(sessionId);
+      log.info(`session ${sessionId} is created with ${JSON.stringify(propset)}`);
+      return result;
+    } catch (err) {
+      log.error('Failed to create sessions');
+      throw err;
+    }
   }
 
   async findElement(next, driver, ...args) {
@@ -54,7 +66,12 @@ export default class WaitCommandPlugin extends BasePlugin {
 
   async handle(next, driver, cmdName, ...args) {
     const includeCommands = ['click', 'setValue', 'clear'];
-    if (includeCommands.includes(cmdName)) {
+    const timeoutProp = await getPluginProperties(driver.sessionId);
+    let executeCommands = [];
+    if (timeoutProp) {
+      executeCommands = timeoutProp.excludeEnabledCheck;
+    }
+    if (includeCommands.includes(cmdName) && !executeCommands.includes(cmdName)) {
       log.info('Wait for element to be clickable');
       await elementEnabled(driver, args[0]);
       log.info('Element is enabled');

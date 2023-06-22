@@ -7,7 +7,6 @@
 	<br>
 	<br>
 </h1>
-
 This is an Appium plugin designed to wait for element to be present.
 
 ## Prerequisite
@@ -15,6 +14,15 @@ This is an Appium plugin designed to wait for element to be present.
 Appium version 2.0
 
 Tested with appium v2.0.0-beta.42
+
+### From Verion 2.0.0 
+* Following bindings are not supported 
+        - `sessionId/waitplugin/timeout`
+        - `sessionId/waitplugin/getTimeout`
+* Following command are renamed 
+        - `plugin: getWaitTimeout` is renamed to `plugin: getWaitPluginProperties`
+        - `plugin: getWaitTimeout` is renamed to `plugin: setWaitPluginProperties`
+
 
 ## Installation - Server
 
@@ -41,7 +49,8 @@ appium --use-plugins=element-wait
 To override the default element-wait retry
 1. Use appium server CLI
 	--plugin-element-wait-timeout=30000
-	--plugin-element-wait-interval-between-attempts=200
+	--plugin-element-wait-interval-between-attempts=200 
+	--plugin-element-wait-element-enabled-check-exclusion-cmds-list=['click']
 	
 
 2. Use appium server config file. [Refer](https://github.com/AppiumTestDistribution/appium-wait-plugin/blob/main/server-config.json). 
@@ -69,23 +78,37 @@ driver.findElementByAccessibilityId("login").sendKeys('Hello');
 ```
 ## Configure Wait timeout in test
 
+While overriding timeouts one can choose to override all or one of the below
+* timeout
+* intervalBetweenAttempts
+
 WDIO Example 
 
 ```
-await driver.executeScript('plugin: setWaitTimeout', [
+await driver.executeScript('plugin: setWaitPluginProperties', [
         {
           timeout: 1111,
           intervalBetweenAttempts: 11,
         },
 ]);
 
-await driver.executeScript('plugin: getWaitTimeout', [])
+await driver.executeScript('plugin: getWaitPluginProperties', [])
+```
+or 
+```
+await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          timeout: 1111,
+        },
+]);
+
+await driver.executeScript('plugin: getWaitPluginProperties', [])
 ```
 
 Java Example 
 
 ```
-driver.executeScript("plugin: setWaitTimeout", ImmutableMap.of("timeout", 1111 , "intervalBetweenAttempts", 11 ));
+driver.executeScript("plugin: setWaitPluginProperties", ImmutableMap.of("timeout", 1111 , "intervalBetweenAttempts", 11 ));
 ```
 
 Server logs will be as below:
@@ -101,3 +124,22 @@ Server logs will be as below:
 [Plugin [element-wait (sessionless)]] Checking if login element is displayed
 [Plugin [element-wait (sessionless)]] login element is displayed.
 ```
+
+## Skip element Enabled Check for commands
+Before performing actions such as `click`, `setValue`, `clear` etc, plugin waits for element to be enabled.
+As mentioned in [#78](https://github.com/AppiumTestDistribution/appium-wait-plugin/issues/78) if there is a need to skip the `elementEnabled` check for a set of commands, `excludeEnabledCheck` can be sent along with timeout values. 
+##### Usage
+wdio
+```
+await driver.executeScript('plugin: setWaitPluginProperties', [
+        {
+          timeout: 1111,
+          intervalBetweenAttempts: 11,
+		  excludeEnabledCheck: ['click','setValue']
+        },
+]);
+
+await driver.executeScript('plugin: getWaitPluginProperties', [])
+```
+
+By default `excludeEnabledCheck` is empty list.

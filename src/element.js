@@ -4,15 +4,15 @@ import ora from 'ora';
 import { errors } from 'appium/driver';
 
 let map = new Map();
+export const defaultTimeOuts = {
+  timeout: 10000,
+  intervalBetweenAttempts: 500,
+  excludeEnabledCheck: [],
+};
 
 export async function find(driver, args) {
-  let elementWaitProps;
-  if (driver.opts.plugin !== undefined && driver.opts.plugin['element-wait'] !== undefined) {
-    elementWaitProps = JSON.parse(JSON.stringify(driver.opts.plugin['element-wait']));
-  }
   const session = driver.sessionId;
-  _setTimeout(elementWaitProps, session);
-  let timeoutProp = _getTimeout(session);
+  let timeoutProp = _getPluginProperties(session) || defaultTimeOuts;
   const locatorArgs = JSON.parse(JSON.stringify(args));
   const strategy = locatorArgs[0];
   const selector = locatorArgs[1];
@@ -64,16 +64,16 @@ export async function find(driver, args) {
   }
 }
 
-export function _getTimeout(session) {
-  return map.get(session);
+export async function getPluginProperties(sessionId) {
+  return _getPluginProperties(sessionId);
 }
 
-export async function setWait(driver, args) {
-  _setTimeout(args, driver.sessionId, true);
+export async function setPluginProperties(sessionId, args) {
+  _setPluginProperties(args, sessionId);
 }
 
 export async function elementEnabled(driver, el) {
-  let timeoutProp = _getTimeout(driver.sessionId);
+  let timeoutProp = _getPluginProperties(driver.sessionId);
   const predicate = async () => {
     const element = await driver.elementEnabled(el);
     if (element) {
@@ -96,6 +96,7 @@ export async function elementEnabled(driver, el) {
     }
   }
 }
+
 async function elementIsDisplayed(driver, element) {
   log.info('Check if element is displayed');
   return await driver.elementDisplayed(element);
@@ -108,7 +109,7 @@ function _getAutomationName(driver) {
 function sessionInfo(driver) {
   if (driver.caps.automationName === 'Fake') return;
   const automationName = _getAutomationName(driver);
-  if (automationName === 'XCuiTest') {
+  if (automationName.toLowerCase() === 'xcuitest') {
     return {
       baseUrl: `${driver.wda.webDriverAgentUrl}`,
       jwProxySession: driver.wda.jwproxy.sessionId,
@@ -124,7 +125,7 @@ function sessionInfo(driver) {
 async function elementState(sessionInfo, strategy, selector, driver) {
   let automationName = _getAutomationName(driver);
   let postBody;
-  if (automationName === 'XCuiTest') {
+  if (automationName.toLowerCase() === 'xcuitest') {
     postBody = JSON.stringify({
       using: strategy,
       value: selector,
@@ -148,38 +149,35 @@ async function elementState(sessionInfo, strategy, selector, driver) {
   return await response.json();
 }
 
-function _setTimeout(
-  elementWaitProps = {
-    timeout: 10000,
-    intervalBetweenAttempts: 500,
-    overrideTimeout: false,
-  },
-  session,
-  overrideTimeout = false
-) {
-  if (overrideTimeout && map.has(session)) {
-    map.delete(session);
+function _getPluginProperties(sessionId) {
+  return map.get(sessionId);
+}
+
+function _setPluginProperties(elementWaitProps, sessionId) {
+  const props = _getPluginProperties(sessionId) || Object.assign({}, defaultTimeOuts);
+  props.timeout = elementWaitProps.timeout || props.timeout;
+  props.intervalBetweenAttempts =
+    elementWaitProps.intervalBetweenAttempts || props.intervalBetweenAttempts;
+  props.excludeEnabledCheck = elementWaitProps.excludeEnabledCheck || props.excludeEnabledCheck;
+
+  if (
+    typeof props.timeout !== 'number' ||
+    typeof props.intervalBetweenAttempts !== 'number' ||
+    !Array.isArray(props.excludeEnabledCheck)
+  ) {
+    log.error('Plugin properties sent are not matching the expected contract');
+    log.error(
+      'Expected contract "timeout" and "intervalBetweenAttempts" should be number and excludeEnabledCheck should be array'
+    );
+    log.error(`example of expected contract ${JSON.stringify(defaultTimeOuts)}`);
+    log.error(`Got ${JSON.stringify(props)}`);
+    throw new Error('Wait plugin properties didnot match contract.');
   }
-  if (!map.has(session)) {
-    log.info(`Timeout properties not set for session ${session}, trying to set one`);
-    let defaultTimeoutProp = elementWaitProps;
-    if (
-      elementWaitProps.timeout !== undefined &&
-      elementWaitProps.timeout !== defaultTimeoutProp.timeout
-    ) {
-      defaultTimeoutProp.timeout = elementWaitProps.timeout;
-      log.info(`Timeout is set to ${defaultTimeoutProp.timeout}`);
-    }
-    if (
-      elementWaitProps.intervalBetweenAttempts !== undefined &&
-      elementWaitProps.intervalBetweenAttempts !== defaultTimeoutProp.intervalBetweenAttempts
-    ) {
-      defaultTimeoutProp.intervalBetweenAttempts = elementWaitProps.intervalBetweenAttempts;
-      log.info(`Internal between attempts is set to ${defaultTimeoutProp.intervalBetweenAttempts}`);
-    }
-    map.set(session, defaultTimeoutProp);
-  }
+
+  map.set(sessionId, props);
   log.info(
-    `Timeout properties set for session ${session} is ${JSON.stringify(_getTimeout(session))} ms`
+    `Timeout properties set for session ${sessionId} is ${JSON.stringify(
+      _getPluginProperties(sessionId)
+    )}`
   );
 }

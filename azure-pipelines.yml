@@ -39,7 +39,8 @@ jobs:
           npm ci
           $NVM_DIR/versions/node/$(node --version)/bin/appium plugin install --source=local .
           nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
-          sleep 10
+          echo `which wait-on`
+          $NVM_DIR/versions/node/$(node --version)/bin/wait-on http://127.0.0.1:4723/wd/hub/status
           PLATFORM=android npm run test-e2e
         displayName: Android E2E Test
   - job: iOS_E2E_Tests
@@ -62,6 +63,6 @@ jobs:
       - script: |
           npm ci
           nohup $NVM_DIR/versions/node/$(node --version)/bin/appium server -ka 800 --use-plugins=element-wait -pa /wd/hub &
-          sleep 10
+          $NVM_DIR/versions/node/$(node --version)/bin/wait-on http://127.0.0.1:4723/wd/hub/status
           PLATFORM=ios npm run test-e2e
         displayName: iOS E2E Test
