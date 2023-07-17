@@ -68,7 +68,7 @@
     "wait-on": "6.0.1"
   },
   "peerDependencies": {
-    "appium": "^2.0.0-beta.57"
+    "appium": "^2.0.0"
   },
   "appium": {
     "pluginName": "element-wait",
