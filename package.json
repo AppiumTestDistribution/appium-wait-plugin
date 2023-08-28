@@ -64,7 +64,7 @@
     "sinon": "^11.0.0",
     "ts-node": "10.8.1",
     "typescript": "^5.1.6",
-    "webdriverio": "7.20.9",
+    "webdriverio": "8.15.9",
     "wait-on": "6.0.1"
   },
   "peerDependencies": {
