@@ -9,9 +9,12 @@
     "build": "npx tsc",
     "prepublish": "npx tsc",
     "prettier": "prettier src --write --single-quote",
+    "clear-cache": "rm -rf $HOME/.cache/appium-wait-plugin",
+    "install-driver": "export APPIUM_HOME=/tmp/some-temp-dir && appium driver install uiautomator2",
     "uninstall": "(appium plugin uninstall element-wait || exit 0)",
-    "install-plugin": "npm run build && appium plugin install --source=local $(pwd)",
-    "reinstall-plugin": "(appium plugin uninstall element-wait || exit 0) && npm run install-plugin"
+    "install-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && npm run build && appium plugin install --source=local $(pwd)",
+    "reinstall-plugin": "export APPIUM_HOME=/tmp/some-temp-dir && (appium plugin uninstall element-wait || exit 0) && npm run install-plugin",
+    "run-server": "export APPIUM_HOME=/tmp/some-temp-dir && appium server -ka 800 --use-plugins=element-wait -pa /wd/hub "
   },
   "repository": {
     "type": "git",
@@ -44,8 +47,6 @@
     "@types/lodash": "^4.14.170",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.6.4",
-    "appium-uiautomator2-driver": "^2.23.0",
-    "appium-xcuitest-driver": "^4.24.3",
     "axios": "0.27.2",
     "babel-eslint": "^10.0.1",
     "chai": "^4.1.0",
@@ -64,11 +65,11 @@
     "sinon": "^11.0.0",
     "ts-node": "10.8.1",
     "typescript": "^5.1.6",
-    "webdriverio": "7.20.9",
+    "webdriverio": "8.27.0",
     "wait-on": "6.0.1"
   },
   "peerDependencies": {
-    "appium": "^2.0.0"
+    "appium": "^2.3.0"
   },
   "appium": {
     "pluginName": "element-wait",
@@ -93,7 +94,7 @@
     }
   },
   "engines": {
-    "node": ">=14",
+    "node": "^14.17.0 || ^16.13.0 || >=18.0.0",
     "npm": ">=8"
   },
   "lint-staged": {
