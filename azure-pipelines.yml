@@ -30,7 +30,9 @@ jobs:
           echo $ANDROID_HOME/emulator/emulator -list-avds
 
           echo "Starting emulator"
-          nohup $ANDROID_HOME/emulator/emulator -avd "$(ANDROID_EMU_NAME)" -no-snapshot -delay-adb > /dev/null 2>&1 &
+          nohup $ANDROID_HOME/emulator/emulator -avd "$(ANDROID_EMU_NAME)" -no-snapshot -delay-adb > /dev/null 2>&1 & $ANDROID_HOME/platform-tools/adb wait-for-any-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+          echo '---'
+          echo '---'
           $ANDROID_HOME/platform-tools/adb wait-for-device
           $ANDROID_HOME/platform-tools/adb devices -l
           echo "Emulator started"
