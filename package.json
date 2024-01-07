@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "scripts": {
     "test": "npm run reinstall-plugin && mocha --require ts-node/register __tests__/plugin.spec.js --timeout 60000 --exit",
-    "test-e2e": "PLATFORM=android mocha --require ts-node/register -p __tests__/e2e/plugin.spec.js --timeout 260000",
+    "test-e2e": "mocha --require ts-node/register -p __tests__/e2e/plugin.spec.js --timeout 260000",
     "build": "npx tsc",
     "prepublish": "npx tsc",
     "prettier": "prettier src --write --single-quote",
