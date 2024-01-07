@@ -1,7 +1,8 @@
 import log from './logger';
 import { waitUntil, TimeoutError } from 'async-wait-until';
 import ora from 'ora';
-import { errors } from 'appium/driver';
+import { errors } from '@appium/base-driver';
+import axios from 'axios';
 
 let map = new Map();
 export const defaultTimeOuts = {
@@ -138,15 +139,16 @@ async function elementState(sessionInfo, strategy, selector, driver) {
       multiple: false,
     });
   }
-  const response = await fetch(
+  const response = await axios.post(
     `${sessionInfo.baseUrl}session/${sessionInfo.jwProxySession}/element`,
+    postBody,
     {
-      body: postBody,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     }
   );
-  return await response.json();
+  return response.data;
 }
 
 function _getPluginProperties(sessionId) {
