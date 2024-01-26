@@ -37,10 +37,11 @@
   "homepage": "https://github.com/saikrishna321/appium-wait-plugin#readme",
   "dependencies": {
     "async-wait-until": "^2.0.12",
-    "ora": "5.4.1",
-    "axios": "0.27.2"
+    "axios": "0.27.2",
+    "ora": "5.4.1"
   },
   "devDependencies": {
+    "@appium/base-plugin": "^2.2.26",
     "@appium/fake-driver": "^4.2.1",
     "@appium/plugin-test-support": "^0.2.0",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
@@ -65,11 +66,11 @@
     "sinon": "^11.0.0",
     "ts-node": "10.8.1",
     "typescript": "^5.1.6",
-    "webdriverio": "8.27.0",
-    "wait-on": "6.0.1"
+    "wait-on": "6.0.1",
+    "webdriverio": "8.27.0"
   },
   "peerDependencies": {
-    "appium": "^2.3.0"
+    "appium": "^2.4.1"
   },
   "appium": {
     "pluginName": "element-wait",
