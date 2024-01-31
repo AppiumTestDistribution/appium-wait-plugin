@@ -1,6 +1,6 @@
 {
   "name": "appium-wait-plugin",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "An appium 2.0 plugin that waits for element to be found",
   "main": "./lib/index.js",
   "scripts": {
@@ -38,10 +38,10 @@
   "dependencies": {
     "async-wait-until": "^2.0.12",
     "axios": "0.27.2",
-    "ora": "5.4.1"
+    "ora": "5.4.1",
+    "@appium/base-plugin": "^2.2.26"
   },
   "devDependencies": {
-    "@appium/base-plugin": "^2.2.26",
     "@appium/fake-driver": "^4.2.1",
     "@appium/plugin-test-support": "^0.2.0",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
